@@ -11,7 +11,12 @@ type Row struct {
 func CreateRow(items []interface{}) *Row {
 	row := &Row{ cells: []*Cell{} }
 	for i, item := range items {
-		row.cells = append(row.cells, CreateCell(i, item))
+		if c, ok := item.(*Cell); ok {
+			c.column = i
+			row.cells = append(row.cells, c)
+		} else {
+			row.cells = append(row.cells, createCell(i, item, nil))
+		}
 	}
 	return row
 }

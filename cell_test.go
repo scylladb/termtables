@@ -6,7 +6,7 @@ import (
 
 func TestCellRenderString(t *testing.T) {
 	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
-	cell := CreateCell(0, "foobar")
+	cell := createCell(0, "foobar", nil)
 
 	output := cell.Render(style)
 	if output != "foobar" {
@@ -16,7 +16,7 @@ func TestCellRenderString(t *testing.T) {
 
 func TestCellRenderBool(t *testing.T) {
 	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
-	cell := CreateCell(0, true)
+	cell := createCell(0, true, nil)
 
 	output := cell.Render(style)
 	if output != "true" {
@@ -26,7 +26,7 @@ func TestCellRenderBool(t *testing.T) {
 
 func TestCellRenderInteger(t *testing.T) {
 	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
-	cell := CreateCell(0, 12345)
+	cell := createCell(0, 12345, nil)
 
 	output := cell.Render(style)
 	if output != "12345" {
@@ -36,7 +36,7 @@ func TestCellRenderInteger(t *testing.T) {
 
 func TestCellRenderFloat(t *testing.T) {
 	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
-	cell := CreateCell(0, 12.345)
+	cell := createCell(0, 12.345, nil)
 
 	output := cell.Render(style)
 	if output != "12.35" {
@@ -47,7 +47,7 @@ func TestCellRenderFloat(t *testing.T) {
 func TestCellRenderPadding(t *testing.T) {
 	style := &renderStyle{ TableStyle: TableStyle{ PaddingLeft: 3, PaddingRight: 4 }, cellWidths: map[int]int{} }
 
-	cell := CreateCell(0, "foobar")
+	cell := createCell(0, "foobar", nil)
 
 	output := cell.Render(style)
 	if output != "   foobar    " {

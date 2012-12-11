@@ -11,6 +11,7 @@ const (
 )
 
 type TableStyle struct {
+	SkipBorder bool
 	BorderX string
 	BorderY string
 	BorderI string
@@ -20,8 +21,13 @@ type TableStyle struct {
 	Alignment tableAlignment
 }
 
-var	DefaultStyle = &TableStyle{ BorderX: "-", BorderY: "|", BorderI: "+",
-		PaddingLeft: 1, PaddingRight: 1, Width: 80 }
+type CellStyle struct {
+	Alignment tableAlignment
+	ColSpan int
+}
+
+var	DefaultStyle = &TableStyle{ SkipBorder: false, BorderX: "-", BorderY: "|",
+		BorderI: "+", PaddingLeft: 1, PaddingRight: 1, Width: 80, Alignment: AlignLeft }
 
 
 type renderStyle struct {
@@ -45,6 +51,10 @@ func createRenderStyle(table *Table) *renderStyle {
 		// iterate over cells
 		if row, ok := element.(*Row); ok {
 			for i, cell := range row.cells {
+				// FIXME: need to support sizing with colspan handling
+				if cell.colSpan > 1 {
+					continue
+				}
 				if style.cellWidths[i] < cell.Width() {
 					style.cellWidths[i] = cell.Width()
 				}
