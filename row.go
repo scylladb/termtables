@@ -10,15 +10,19 @@ type Row struct {
 
 func CreateRow(items []interface{}) *Row {
 	row := &Row{ cells: []*Cell{} }
-	for i, item := range items {
-		if c, ok := item.(*Cell); ok {
-			c.column = i
-			row.cells = append(row.cells, c)
-		} else {
-			row.cells = append(row.cells, createCell(i, item, nil))
-		}
+	for _, item := range items {
+		row.AddCell(item)
 	}
 	return row
+}
+
+func (r *Row) AddCell(item interface{}) {
+	if c, ok := item.(*Cell); ok {
+		c.column = len(r.cells)
+		r.cells = append(r.cells, c)
+	} else {
+		r.cells = append(r.cells, createCell(len(r.cells), item, nil))
+	}
 }
 
 func (r *Row) Render(style *renderStyle) string {

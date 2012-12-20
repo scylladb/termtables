@@ -22,8 +22,10 @@ func (t *Table) AddSeparator() {
 	t.elements = append(t.elements, &Separator{})
 }
 
-func (t *Table) AddRow(items ...interface{}) {
-	t.elements = append(t.elements, CreateRow(items))
+func (t *Table) AddRow(items ...interface{}) *Row {
+	row := CreateRow(items)
+	t.elements = append(t.elements, row)
+	return row
 }
 
 func (t *Table) AddTitle(title interface{}) {
