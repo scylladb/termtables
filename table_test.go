@@ -83,3 +83,26 @@ func TestTableWithNoHeaders(t *testing.T) {
 		t.Fatal(DisplayFailedOutput(output, expected))
 	}
 }
+
+func TestTableUnicodeWidths(t *testing.T) {
+	expected := "+-----------+------+\n" +
+							"| Name      | Cost |\n" +
+							"+-----------+------+\n" +
+							"| Currency  | ¤10  |\n" +
+							"| US Dollar | $30  |\n" +
+							"| Euro      | €27  |\n" +
+							"| Thai      | ฿70  |\n" +
+							"+-----------+------+\n"
+
+	table := CreateTable()
+	table.AddHeaders("Name", "Cost")
+	table.AddRow("Currency", "¤10")
+	table.AddRow("US Dollar", "$30")
+	table.AddRow("Euro", "€27")
+	table.AddRow("Thai", "฿70")
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}
