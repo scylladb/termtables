@@ -6,6 +6,7 @@ import (
 	"math"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 )
 
 type Cell struct {
@@ -31,7 +32,7 @@ func createCell(column int, v interface{}, style *CellStyle) *Cell {
 }
 
 func (c *Cell) Width() int {
-	return len(c.formattedValue)
+	return utf8.RuneCountInString(c.formattedValue)
 }
 
 func (c *Cell) Render(style *renderStyle) (buffer string) {
