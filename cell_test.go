@@ -54,3 +54,32 @@ func TestCellRenderPadding(t *testing.T) {
 		t.Fatal("Unexpected output:", output)
 	}
 }
+
+type foo struct {
+	v string
+}
+func (f *foo) String() string {
+	return f.v
+}
+
+func TestCellRenderStringerStruct(t *testing.T) {
+	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
+	cell := createCell(0, &foo{v:"bar"}, nil)
+
+	output := cell.Render(style)
+	if output != "bar" {
+		t.Fatal("Unexpected output:", output)
+	}
+}
+
+type fooString string
+
+func TestCellRenderGeneric(t *testing.T) {
+	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
+	cell := createCell(0, fooString("baz"), nil)
+
+	output := cell.Render(style)
+	if output != "baz" {
+		t.Fatal("Unexpected output:", output)
+	}
+}

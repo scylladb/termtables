@@ -3,6 +3,7 @@
 package termtables
 
 import (
+	"fmt"
 	"math"
 	"strconv"
 	"strings"
@@ -104,19 +105,21 @@ func (c *Cell) alignCell(style *renderStyle) string {
 
 // Format the raw value as a string depending on the type
 func renderValue(v interface{}) string {
-	switch v.(type) {
+	switch vv := v.(type) {
 	case string:
-		return v.(string)
+		return vv
 	case bool:
-		return strconv.FormatBool(v.(bool))
+		return strconv.FormatBool(vv)
 	case int:
-		return strconv.Itoa(v.(int))
+		return strconv.Itoa(vv)
 	case int64:
-		return strconv.FormatInt(v.(int64), 10)
+		return strconv.FormatInt(vv, 10)
 	case uint64:
-		return strconv.FormatUint(v.(uint64), 10)
+		return strconv.FormatUint(vv, 10)
 	case float64:
-		return strconv.FormatFloat(v.(float64), 'f', 2, 64)
+		return strconv.FormatFloat(vv, 'f', 2, 64)
+	case fmt.Stringer:
+		return vv.String()
 	}
-	return ""
+	return fmt.Sprintf("%v", v)
 }
