@@ -9,7 +9,7 @@ type Row struct {
 }
 
 func CreateRow(items []interface{}) *Row {
-	row := &Row{ cells: []*Cell{} }
+	row := &Row{cells: []*Cell{}}
 	for _, item := range items {
 		row.AddCell(item)
 	}
