@@ -2,6 +2,8 @@
 
 package termtables
 
+var useUTF8ByDefault = false
+
 type Element interface {
 	Render(*renderStyle) string
 }
@@ -14,8 +16,16 @@ type Table struct {
 	title    *interface{}
 }
 
+func EnableUTF8() {
+	useUTF8ByDefault = true
+}
+
 func CreateTable() *Table {
-	return &Table{elements: []Element{}, Style: DefaultStyle}
+	t := &Table{elements: []Element{}, Style: DefaultStyle}
+	if useUTF8ByDefault {
+		t.Style.setUtfBoxStyle()
+	}
+	return t
 }
 
 func (t *Table) AddSeparator() {
