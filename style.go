@@ -5,39 +5,38 @@ package termtables
 type tableAlignment int
 
 const (
-	AlignLeft = tableAlignment(1)
+	AlignLeft   = tableAlignment(1)
 	AlignCenter = tableAlignment(2)
-	AlignRight = tableAlignment(3)
+	AlignRight  = tableAlignment(3)
 )
 
 type TableStyle struct {
-	SkipBorder bool
-	BorderX string
-	BorderY string
-	BorderI string
-	PaddingLeft int
+	SkipBorder   bool
+	BorderX      string
+	BorderY      string
+	BorderI      string
+	PaddingLeft  int
 	PaddingRight int
-	Width int
-	Alignment tableAlignment
+	Width        int
+	Alignment    tableAlignment
 }
 
 type CellStyle struct {
 	Alignment tableAlignment
-	ColSpan int
+	ColSpan   int
 }
 
-var	DefaultStyle = &TableStyle{ SkipBorder: false, BorderX: "-", BorderY: "|",
-		BorderI: "+", PaddingLeft: 1, PaddingRight: 1, Width: 80, Alignment: AlignLeft }
-
+var DefaultStyle = &TableStyle{SkipBorder: false, BorderX: "-", BorderY: "|",
+	BorderI: "+", PaddingLeft: 1, PaddingRight: 1, Width: 80, Alignment: AlignLeft}
 
 type renderStyle struct {
 	cellWidths map[int]int
-	columns int
+	columns    int
 	TableStyle
 }
 
 func createRenderStyle(table *Table) *renderStyle {
-	style := &renderStyle{ TableStyle: *table.Style, cellWidths: map[int]int{} }
+	style := &renderStyle{TableStyle: *table.Style, cellWidths: map[int]int{}}
 
 	// FIXME: handle actually defined width condition
 

@@ -6,21 +6,21 @@ import (
 
 func DisplayFailedOutput(actual, expected string) string {
 	return "Output didn't match expected\n\n" +
-				 "Actual:\n\n" +
-				 actual + "\n" +
-				 "Expected:\n\n" +
-				 expected
+		"Actual:\n\n" +
+		actual + "\n" +
+		"Expected:\n\n" +
+		expected
 }
 
 func TestCreateTable(t *testing.T) {
 	expected := "+-----------+-------+\n" +
-							"| Name      | Value |\n" +
-							"+-----------+-------+\n" +
-							"| hey       | you   |\n" +
-							"| ken       | 1234  |\n" +
-							"| derek     | 3.14  |\n" +
-							"| derek too | 3.15  |\n" +
-							"+-----------+-------+\n"
+		"| Name      | Value |\n" +
+		"+-----------+-------+\n" +
+		"| hey       | you   |\n" +
+		"| ken       | 1234  |\n" +
+		"| derek     | 3.14  |\n" +
+		"| derek too | 3.15  |\n" +
+		"+-----------+-------+\n"
 
 	table := CreateTable()
 
@@ -38,15 +38,15 @@ func TestCreateTable(t *testing.T) {
 
 func TestTableWithHeader(t *testing.T) {
 	expected := "+-------------------+\n" +
-							"|      Example      |\n" +
-							"+-----------+-------+\n" +
-							"| Name      | Value |\n" +
-							"+-----------+-------+\n" +
-							"| hey       | you   |\n" +
-							"| ken       | 1234  |\n" +
-							"| derek     | 3.14  |\n" +
-							"| derek too | 3.15  |\n" +
-							"+-----------+-------+\n"
+		"|      Example      |\n" +
+		"+-----------+-------+\n" +
+		"| Name      | Value |\n" +
+		"+-----------+-------+\n" +
+		"| hey       | you   |\n" +
+		"| ken       | 1234  |\n" +
+		"| derek     | 3.14  |\n" +
+		"| derek too | 3.15  |\n" +
+		"+-----------+-------+\n"
 
 	table := CreateTable()
 
@@ -65,11 +65,11 @@ func TestTableWithHeader(t *testing.T) {
 
 func TestTableWithNoHeaders(t *testing.T) {
 	expected := "+-----------+------+\n" +
-							"| hey       | you  |\n" +
-							"| ken       | 1234 |\n" +
-							"| derek     | 3.14 |\n" +
-							"| derek too | 3.15 |\n" +
-							"+-----------+------+\n"
+		"| hey       | you  |\n" +
+		"| ken       | 1234 |\n" +
+		"| derek     | 3.14 |\n" +
+		"| derek too | 3.15 |\n" +
+		"+-----------+------+\n"
 
 	table := CreateTable()
 
@@ -86,13 +86,13 @@ func TestTableWithNoHeaders(t *testing.T) {
 
 func TestTableUnicodeWidths(t *testing.T) {
 	expected := "+-----------+------+\n" +
-							"| Name      | Cost |\n" +
-							"+-----------+------+\n" +
-							"| Currency  | ¤10  |\n" +
-							"| US Dollar | $30  |\n" +
-							"| Euro      | €27  |\n" +
-							"| Thai      | ฿70  |\n" +
-							"+-----------+------+\n"
+		"| Name      | Cost |\n" +
+		"+-----------+------+\n" +
+		"| Currency  | ¤10  |\n" +
+		"| US Dollar | $30  |\n" +
+		"| Euro      | €27  |\n" +
+		"| Thai      | ฿70  |\n" +
+		"+-----------+------+\n"
 
 	table := CreateTable()
 	table.AddHeaders("Name", "Cost")

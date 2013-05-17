@@ -11,10 +11,10 @@ import (
 )
 
 type Cell struct {
-	column int
+	column         int
 	formattedValue string
-	alignment *tableAlignment
-	colSpan int
+	alignment      *tableAlignment
+	colSpan        int
 }
 
 func CreateCell(v interface{}, style *CellStyle) *Cell {
@@ -22,7 +22,7 @@ func CreateCell(v interface{}, style *CellStyle) *Cell {
 }
 
 func createCell(column int, v interface{}, style *CellStyle) *Cell {
-	cell := &Cell{ column: column, formattedValue: renderValue(v), colSpan: 1 }
+	cell := &Cell{column: column, formattedValue: renderValue(v), colSpan: 1}
 	if style != nil {
 		cell.alignment = &style.Alignment
 		if style.ColSpan != 0 {
@@ -60,7 +60,7 @@ func (c *Cell) alignCell(style *renderStyle) string {
 
 	if c.colSpan > 1 {
 		for i := 1; i < c.colSpan; i++ {
-			w := style.CellWidth(c.column+i)
+			w := style.CellWidth(c.column + i)
 			if w == 0 {
 				break
 			}
@@ -89,7 +89,7 @@ func (c *Cell) alignCell(style *renderStyle) string {
 		buffer += c.formattedValue
 
 	case AlignCenter:
-		left, right :=  0, 0
+		left, right := 0, 0
 		if l := width - c.Width(); l > 0 {
 			lf := float64(l)
 			left = int(math.Floor(lf / 2))

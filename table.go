@@ -10,12 +10,12 @@ type Table struct {
 	Style *TableStyle
 
 	elements []Element
-	headers *[]interface{}
-	title   *interface{}
+	headers  *[]interface{}
+	title    *interface{}
 }
 
 func CreateTable() *Table {
-	return &Table{ elements: []Element{}, Style: DefaultStyle }
+	return &Table{elements: []Element{}, Style: DefaultStyle}
 }
 
 func (t *Table) AddSeparator() {
@@ -42,7 +42,7 @@ func (t *Table) Render() (buffer string) {
 
 	// initial top line
 	if !t.Style.SkipBorder {
-		ne := []Element { &separator }
+		ne := []Element{&separator}
 		ne = append(ne, t.elements...)
 		t.elements = ne
 	}
@@ -50,14 +50,14 @@ func (t *Table) Render() (buffer string) {
 	// if we have headers, include them
 	if t.headers != nil {
 		// FIXME: there must be a better way to prepend an array in Go than this
-		ne := []Element { &separator, CreateRow(*t.headers) }
+		ne := []Element{&separator, CreateRow(*t.headers)}
 		ne = append(ne, t.elements...)
 		t.elements = ne
 	}
 
 	// if we have a title, write them
 	if t.title != nil {
-		ne := []Element { &StraightSeparator{}, CreateRow([]interface{}{CreateCell(*t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})}) }
+		ne := []Element{&StraightSeparator{}, CreateRow([]interface{}{CreateCell(*t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})})}
 		ne = append(ne, t.elements...)
 		t.elements = ne
 	}

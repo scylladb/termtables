@@ -5,7 +5,7 @@ import (
 )
 
 func TestCellRenderString(t *testing.T) {
-	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
+	style := &renderStyle{TableStyle: TableStyle{}, cellWidths: map[int]int{}}
 	cell := createCell(0, "foobar", nil)
 
 	output := cell.Render(style)
@@ -15,7 +15,7 @@ func TestCellRenderString(t *testing.T) {
 }
 
 func TestCellRenderBool(t *testing.T) {
-	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
+	style := &renderStyle{TableStyle: TableStyle{}, cellWidths: map[int]int{}}
 	cell := createCell(0, true, nil)
 
 	output := cell.Render(style)
@@ -25,7 +25,7 @@ func TestCellRenderBool(t *testing.T) {
 }
 
 func TestCellRenderInteger(t *testing.T) {
-	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
+	style := &renderStyle{TableStyle: TableStyle{}, cellWidths: map[int]int{}}
 	cell := createCell(0, 12345, nil)
 
 	output := cell.Render(style)
@@ -35,7 +35,7 @@ func TestCellRenderInteger(t *testing.T) {
 }
 
 func TestCellRenderFloat(t *testing.T) {
-	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
+	style := &renderStyle{TableStyle: TableStyle{}, cellWidths: map[int]int{}}
 	cell := createCell(0, 12.345, nil)
 
 	output := cell.Render(style)
@@ -45,7 +45,7 @@ func TestCellRenderFloat(t *testing.T) {
 }
 
 func TestCellRenderPadding(t *testing.T) {
-	style := &renderStyle{ TableStyle: TableStyle{ PaddingLeft: 3, PaddingRight: 4 }, cellWidths: map[int]int{} }
+	style := &renderStyle{TableStyle: TableStyle{PaddingLeft: 3, PaddingRight: 4}, cellWidths: map[int]int{}}
 
 	cell := createCell(0, "foobar", nil)
 
@@ -58,13 +58,14 @@ func TestCellRenderPadding(t *testing.T) {
 type foo struct {
 	v string
 }
+
 func (f *foo) String() string {
 	return f.v
 }
 
 func TestCellRenderStringerStruct(t *testing.T) {
-	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
-	cell := createCell(0, &foo{v:"bar"}, nil)
+	style := &renderStyle{TableStyle: TableStyle{}, cellWidths: map[int]int{}}
+	cell := createCell(0, &foo{v: "bar"}, nil)
 
 	output := cell.Render(style)
 	if output != "bar" {
@@ -75,7 +76,7 @@ func TestCellRenderStringerStruct(t *testing.T) {
 type fooString string
 
 func TestCellRenderGeneric(t *testing.T) {
-	style := &renderStyle{ TableStyle: TableStyle{}, cellWidths: map[int]int{} }
+	style := &renderStyle{TableStyle: TableStyle{}, cellWidths: map[int]int{}}
 	cell := createCell(0, fooString("baz"), nil)
 
 	output := cell.Render(style)

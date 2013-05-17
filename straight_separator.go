@@ -4,7 +4,7 @@ package termtables
 
 import "strings"
 
-type StraightSeparator struct { }
+type StraightSeparator struct{}
 
 func (s *StraightSeparator) Render(style *renderStyle) string {
 	// loop over getting dashes

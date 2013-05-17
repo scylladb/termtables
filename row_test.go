@@ -5,9 +5,9 @@ import (
 )
 
 func TestBasicRowRender(t *testing.T) {
-	row := CreateRow([]interface{} {"foo", "bar"})
-	style := &renderStyle{ TableStyle: TableStyle{BorderX: "-", BorderY: "|", BorderI: "+",
-		PaddingLeft: 1, PaddingRight: 1}, cellWidths: map[int]int{0:3, 1:3} }
+	row := CreateRow([]interface{}{"foo", "bar"})
+	style := &renderStyle{TableStyle: TableStyle{BorderX: "-", BorderY: "|", BorderI: "+",
+		PaddingLeft: 1, PaddingRight: 1}, cellWidths: map[int]int{0: 3, 1: 3}}
 
 	output := row.Render(style)
 	if output != "| foo | bar |" {
@@ -16,9 +16,9 @@ func TestBasicRowRender(t *testing.T) {
 }
 
 func TestRowRenderWidthBasedPadding(t *testing.T) {
-	row := CreateRow([]interface{} {"foo", "bar"})
-	style := &renderStyle{ TableStyle: TableStyle{BorderX: "-", BorderY: "|", BorderI: "+",
-		PaddingLeft: 1, PaddingRight: 1}, cellWidths: map[int]int{0:3, 1:5} }
+	row := CreateRow([]interface{}{"foo", "bar"})
+	style := &renderStyle{TableStyle: TableStyle{BorderX: "-", BorderY: "|", BorderI: "+",
+		PaddingLeft: 1, PaddingRight: 1}, cellWidths: map[int]int{0: 3, 1: 5}}
 
 	output := row.Render(style)
 	if output != "| foo | bar   |" {
