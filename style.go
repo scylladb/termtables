@@ -10,15 +10,25 @@ const (
 	AlignRight  = tableAlignment(3)
 )
 
+// For the Border rules, only X, Y and I are needed, and all have defaults.
+// The others will all default to the same as BorderI.
 type TableStyle struct {
-	SkipBorder   bool
-	BorderX      string
-	BorderY      string
-	BorderI      string
-	PaddingLeft  int
-	PaddingRight int
-	Width        int
-	Alignment    tableAlignment
+	SkipBorder        bool
+	BorderX           string
+	BorderY           string
+	BorderI           string
+	BorderTop         string
+	BorderBottom      string
+	BorderRight       string
+	BorderLeft        string
+	BorderTopLeft     string
+	BorderTopRight    string
+	BorderBottomLeft  string
+	BorderBottomRight string
+	PaddingLeft       int
+	PaddingRight      int
+	Width             int
+	Alignment         tableAlignment
 }
 
 type CellStyle struct {
@@ -26,8 +36,13 @@ type CellStyle struct {
 	ColSpan   int
 }
 
-var DefaultStyle = &TableStyle{SkipBorder: false, BorderX: "-", BorderY: "|",
-	BorderI: "+", PaddingLeft: 1, PaddingRight: 1, Width: 80, Alignment: AlignLeft}
+var DefaultStyle = &TableStyle{
+	SkipBorder: false,
+	BorderX:    "-", BorderY: "|", BorderI: "+",
+	PaddingLeft: 1, PaddingRight: 1,
+	Width:     80,
+	Alignment: AlignLeft,
+}
 
 type renderStyle struct {
 	cellWidths map[int]int
@@ -35,8 +50,50 @@ type renderStyle struct {
 	TableStyle
 }
 
+func (s *TableStyle) setUtfBoxStyle() {
+	s.BorderX = "─"
+	s.BorderY = "│"
+	s.BorderI = "┼"
+	s.BorderTop = "┬"
+	s.BorderBottom = "┴"
+	s.BorderLeft = "├"
+	s.BorderRight = "┤"
+	s.BorderTopLeft = "┌"
+	s.BorderTopRight = "┐"
+	s.BorderBottomLeft = "└"
+	s.BorderBottomRight = "┘"
+}
+
+func (s *TableStyle) fillStyleRules() {
+	if s.BorderTop == "" {
+		s.BorderTop = s.BorderI
+	}
+	if s.BorderBottom == "" {
+		s.BorderBottom = s.BorderI
+	}
+	if s.BorderLeft == "" {
+		s.BorderLeft = s.BorderI
+	}
+	if s.BorderRight == "" {
+		s.BorderRight = s.BorderI
+	}
+	if s.BorderTopLeft == "" {
+		s.BorderTopLeft = s.BorderI
+	}
+	if s.BorderTopRight == "" {
+		s.BorderTopRight = s.BorderI
+	}
+	if s.BorderBottomLeft == "" {
+		s.BorderBottomLeft = s.BorderI
+	}
+	if s.BorderBottomRight == "" {
+		s.BorderBottomRight = s.BorderI
+	}
+}
+
 func createRenderStyle(table *Table) *renderStyle {
 	style := &renderStyle{TableStyle: *table.Style, cellWidths: map[int]int{}}
+	style.TableStyle.fillStyleRules()
 
 	// FIXME: handle actually defined width condition
 

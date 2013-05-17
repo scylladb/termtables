@@ -36,30 +36,43 @@ func (t *Table) AddHeaders(headers ...interface{}) {
 	t.headers = &headers
 }
 
+func (t *Table) UTF8Box() {
+	t.Style.setUtfBoxStyle()
+}
+
 func (t *Table) Render() (buffer string) {
-	// used generically to add a separator
-	separator := Separator{}
+	// elements is already populated with row data
 
 	// initial top line
 	if !t.Style.SkipBorder {
-		ne := []Element{&separator}
-		ne = append(ne, t.elements...)
-		t.elements = ne
+		if t.title != nil && t.headers == nil {
+			t.elements = append([]Element{&Separator{where: LINE_SUBTOP}}, t.elements...)
+		} else if t.title == nil && t.headers == nil {
+			t.elements = append([]Element{&Separator{where: LINE_TOP}}, t.elements...)
+		} else {
+			t.elements = append([]Element{&Separator{where: LINE_INNER}}, t.elements...)
+		}
 	}
 
 	// if we have headers, include them
 	if t.headers != nil {
-		// FIXME: there must be a better way to prepend an array in Go than this
-		ne := []Element{&separator, CreateRow(*t.headers)}
-		ne = append(ne, t.elements...)
-		t.elements = ne
+		ne := make([]Element, 2)
+		ne[1] = CreateRow(*t.headers)
+		if t.title != nil {
+			ne[0] = &Separator{where: LINE_SUBTOP}
+		} else {
+			ne[0] = &Separator{where: LINE_TOP}
+		}
+		t.elements = append(ne, t.elements...)
 	}
 
 	// if we have a title, write them
 	if t.title != nil {
-		ne := []Element{&StraightSeparator{}, CreateRow([]interface{}{CreateCell(*t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})})}
-		ne = append(ne, t.elements...)
-		t.elements = ne
+		ne := []Element{
+			&StraightSeparator{where: LINE_TOP},
+			CreateRow([]interface{}{CreateCell(*t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})}),
+		}
+		t.elements = append(ne, t.elements...)
 	}
 
 	// generate the runtime style
@@ -72,7 +85,7 @@ func (t *Table) Render() (buffer string) {
 
 	// add bottom line
 	if !style.SkipBorder {
-		buffer += separator.Render(style) + "\n"
+		buffer += (&Separator{where: LINE_BOTTOM}).Render(style) + "\n"
 	}
 
 	return buffer

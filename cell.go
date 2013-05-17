@@ -64,7 +64,7 @@ func (c *Cell) alignCell(style *renderStyle) string {
 			if w == 0 {
 				break
 			}
-			width += style.PaddingLeft + w + style.PaddingRight + len(style.BorderY)
+			width += style.PaddingLeft + w + style.PaddingRight + utf8.RuneCountInString(style.BorderY)
 		}
 	}
 
