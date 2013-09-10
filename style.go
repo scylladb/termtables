@@ -58,10 +58,10 @@ func (s *TableStyle) setUtfBoxStyle() {
 	s.BorderBottom = "┴"
 	s.BorderLeft = "├"
 	s.BorderRight = "┤"
-	s.BorderTopLeft = "┌"
-	s.BorderTopRight = "┐"
-	s.BorderBottomLeft = "└"
-	s.BorderBottomRight = "┘"
+	s.BorderTopLeft = "╭"
+	s.BorderTopRight = "╮"
+	s.BorderBottomLeft = "╰"
+	s.BorderBottomRight = "╯"
 }
 
 func (s *TableStyle) fillStyleRules() {
