@@ -12,8 +12,9 @@ type Table struct {
 	Style *TableStyle
 
 	elements []Element
+	minWidth int
 	headers  *[]interface{}
-	title    *interface{}
+	title    string
 }
 
 func EnableUTF8() {
@@ -38,8 +39,9 @@ func (t *Table) AddRow(items ...interface{}) *Row {
 	return row
 }
 
-func (t *Table) AddTitle(title interface{}) {
-	t.title = &title
+func (t *Table) AddTitle(title string) {
+	t.title = title
+	t.minWidth = len(title)
 }
 
 func (t *Table) AddHeaders(headers ...interface{}) {
@@ -55,9 +57,9 @@ func (t *Table) Render() (buffer string) {
 
 	// initial top line
 	if !t.Style.SkipBorder {
-		if t.title != nil && t.headers == nil {
+		if t.title != "" && t.headers == nil {
 			t.elements = append([]Element{&Separator{where: LINE_SUBTOP}}, t.elements...)
-		} else if t.title == nil && t.headers == nil {
+		} else if t.title == "" && t.headers == nil {
 			t.elements = append([]Element{&Separator{where: LINE_TOP}}, t.elements...)
 		} else {
 			t.elements = append([]Element{&Separator{where: LINE_INNER}}, t.elements...)
@@ -68,7 +70,7 @@ func (t *Table) Render() (buffer string) {
 	if t.headers != nil {
 		ne := make([]Element, 2)
 		ne[1] = CreateRow(*t.headers)
-		if t.title != nil {
+		if t.title != "" {
 			ne[0] = &Separator{where: LINE_SUBTOP}
 		} else {
 			ne[0] = &Separator{where: LINE_TOP}
@@ -77,10 +79,10 @@ func (t *Table) Render() (buffer string) {
 	}
 
 	// if we have a title, write them
-	if t.title != nil {
+	if t.title != "" {
 		ne := []Element{
 			&StraightSeparator{where: LINE_TOP},
-			CreateRow([]interface{}{CreateCell(*t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})}),
+			CreateRow([]interface{}{CreateCell(t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})}),
 		}
 		t.elements = append(ne, t.elements...)
 	}
