@@ -13,8 +13,8 @@ type Table struct {
 
 	elements []Element
 	minWidth int
-	headers  *[]interface{}
-	title    string
+	headers  []interface{}
+	title    interface{}
 }
 
 func EnableUTF8() {
@@ -39,13 +39,14 @@ func (t *Table) AddRow(items ...interface{}) *Row {
 	return row
 }
 
-func (t *Table) AddTitle(title string) {
+func (t *Table) AddTitle(title interface{}) {
 	t.title = title
-	t.minWidth = len(title)
+
+	t.minWidth = len(renderValue(title))
 }
 
 func (t *Table) AddHeaders(headers ...interface{}) {
-	t.headers = &headers
+	t.headers = headers[:]
 }
 
 func (t *Table) UTF8Box() {
@@ -57,9 +58,9 @@ func (t *Table) Render() (buffer string) {
 
 	// initial top line
 	if !t.Style.SkipBorder {
-		if t.title != "" && t.headers == nil {
+		if t.title != nil && t.headers == nil {
 			t.elements = append([]Element{&Separator{where: LINE_SUBTOP}}, t.elements...)
-		} else if t.title == "" && t.headers == nil {
+		} else if t.title == nil && t.headers == nil {
 			t.elements = append([]Element{&Separator{where: LINE_TOP}}, t.elements...)
 		} else {
 			t.elements = append([]Element{&Separator{where: LINE_INNER}}, t.elements...)
@@ -69,8 +70,8 @@ func (t *Table) Render() (buffer string) {
 	// if we have headers, include them
 	if t.headers != nil {
 		ne := make([]Element, 2)
-		ne[1] = CreateRow(*t.headers)
-		if t.title != "" {
+		ne[1] = CreateRow(t.headers)
+		if t.title != nil {
 			ne[0] = &Separator{where: LINE_SUBTOP}
 		} else {
 			ne[0] = &Separator{where: LINE_TOP}
@@ -79,7 +80,7 @@ func (t *Table) Render() (buffer string) {
 	}
 
 	// if we have a title, write them
-	if t.title != "" {
+	if t.title != nil {
 		ne := []Element{
 			&StraightSeparator{where: LINE_TOP},
 			CreateRow([]interface{}{CreateCell(t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})}),
