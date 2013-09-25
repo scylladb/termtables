@@ -106,13 +106,23 @@ func createRenderStyle(table *Table) *renderStyle {
 
 		// iterate over cells
 		if row, ok := element.(*Row); ok {
+			totalWidth := 0
 			for i, cell := range row.cells {
+				totalWidth = totalWidth + cell.Width()
 				// FIXME: need to support sizing with colspan handling
 				if cell.colSpan > 1 {
 					continue
 				}
 				if style.cellWidths[i] < cell.Width() {
 					style.cellWidths[i] = cell.Width()
+				}
+				if i == len(row.cells)-1 {
+					if table.minWidth > totalWidth {
+						if style.cellWidths[i] <= cell.Width() {
+							// The minus 3 is to avoid odd numbers of padding on right over left-hand side.
+							style.cellWidths[i] = cell.Width() + table.minWidth - totalWidth - 3
+						}
+					}
 				}
 			}
 		}

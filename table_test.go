@@ -63,6 +63,33 @@ func TestTableWithHeader(t *testing.T) {
 	}
 }
 
+func TestTableTitleWidthAdjusts(t *testing.T) {
+	expected := "+--------------------------------+\n" +
+		"|   Example My Foo Bar'd Test    |\n" +
+		"+-----------+--------------------+\n" +
+		"| Name      | Value              |\n" +
+		"+-----------+--------------------+\n" +
+		"| hey       | you                |\n" +
+		"| ken       | 1234               |\n" +
+		"| derek     | 3.14               |\n" +
+		"| derek too | 3.15               |\n" +
+		"+-----------+--------------------+\n"
+
+	table := CreateTable()
+
+	table.AddTitle("Example My Foo Bar'd Test")
+	table.AddHeaders("Name", "Value")
+	table.AddRow("hey", "you")
+	table.AddRow("ken", 1234)
+	table.AddRow("derek", 3.14)
+	table.AddRow("derek too", 3.1456788)
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}
+
 func TestTableWithNoHeaders(t *testing.T) {
 	expected := "+-----------+------+\n" +
 		"| hey       | you  |\n" +
