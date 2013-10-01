@@ -2,6 +2,12 @@
 
 package termtables
 
+import (
+	"strings"
+
+	"github.com/apcera/termtables/locale"
+)
+
 var useUTF8ByDefault = false
 
 type Element interface {
@@ -19,6 +25,13 @@ type Table struct {
 
 func EnableUTF8() {
 	useUTF8ByDefault = true
+}
+
+func init() {
+	charmap := locale.GetCharmap()
+	if strings.EqualFold(charmap, "UTF-8") {
+		useUTF8ByDefault = true
+	}
 }
 
 func CreateTable() *Table {
