@@ -6,9 +6,11 @@ import (
 	"strings"
 
 	"github.com/apcera/termtables/locale"
+	"github.com/apcera/termtables/term"
 )
 
 var useUTF8ByDefault = false
+var MaxColumns = 80
 
 type Element interface {
 	Render(*renderStyle) string
@@ -23,14 +25,26 @@ type Table struct {
 	title    interface{}
 }
 
+// Unconditionally use UTF-8 box-drawing characters for the table, unless
+// explicitly overriden in style.
 func EnableUTF8() {
 	useUTF8ByDefault = true
 }
 
-func init() {
+// If the current locale indicates a UTF-8 charmap, then enable use of
+// UTF-8 bow-drawing characters by default.
+func EnableUTF8PerLocale() {
 	charmap := locale.GetCharmap()
 	if strings.EqualFold(charmap, "UTF-8") {
 		useUTF8ByDefault = true
+	}
+}
+
+func init() {
+	// do not enable UTF-8 per locale by default, breaks tests
+	sz, err := term.GetSize()
+	if err == nil && sz.Columns != 0 {
+		MaxColumns = sz.Columns
 	}
 }
 
