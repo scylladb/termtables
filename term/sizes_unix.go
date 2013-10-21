@@ -20,10 +20,16 @@ import (
 	"unsafe"
 )
 
+// ErrGetWinsizeFailed indicates that the system call to extract the size of
+// a Unix tty from the kernel failed.
 var ErrGetWinsizeFailed = errors.New("term: syscall.TIOCGWINSZ failed")
 
-// The Window Size is the terminal size maintained by the kernel for the TTY.
-// This is distinct from any overrides that might exist.
+// GetTerminalWindowSize returns the terminal size maintained by the kernel
+// for a Unix TTY, passed in as an *os.File.  This information can be seen
+// with the stty(1) command, and changes in size (eg, terminal emulator
+// resized) should trigger a SIGWINCH signal delivery to the foreground process
+// group at the time of the change, so a long-running process might reasonably
+// watch for SIGWINCH and arrange to re-fetch the size when that happens.
 func GetTerminalWindowSize(file *os.File) (*Size, error) {
 	fd := uintptr(file.Fd())
 	winsize := C.struct_winsize{}

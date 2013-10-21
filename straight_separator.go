@@ -7,10 +7,16 @@ import (
 	"unicode/utf8"
 )
 
+// A StraightSeparator is a horizontal line with associated information about
+// what sort of position it takes in the table, so as to control which shapes
+// will be used where vertical lines are expected to touch this horizontal
+// line.
 type StraightSeparator struct {
 	where lineType
 }
 
+// Render returns a string representing this separator, with all border
+// crossings appropriately chosen.
 func (s *StraightSeparator) Render(style *renderStyle) string {
 	// loop over getting dashes
 	width := 0

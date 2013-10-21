@@ -6,17 +6,21 @@ import (
 	"os"
 )
 
+// Size is the size of a terminal, expressed in character cells, as Lines and
+// Columns.  This might come from environment variables or OS-dependent
+// resources.
 type Size struct {
 	Lines   int
 	Columns int
 }
 
-// Get the terminal window size.
+// GetSize will return the terminal window size.
+//
 // We prefer environ $LINES/$COLUMNS, then fall back to tty-held information.
-// We do not support use of termcap/terminfo to derive size information.
+// We do not support use of termcap/terminfo to derive default size information.
 func GetSize() (*Size, error) {
-	envSize, envOk := GetEnvWindowSize()
-	if envOk && envSize.Lines != 0 && envSize.Columns != 0 {
+	envSize := GetEnvWindowSize()
+	if envSize != nil && envSize.Lines != 0 && envSize.Columns != 0 {
 		return envSize, nil
 	}
 
@@ -31,12 +35,12 @@ func GetSize() (*Size, error) {
 
 	size, err := GetTerminalWindowSize(fh)
 	if err != nil {
-		if envOk {
+		if envSize != nil {
 			return envSize, nil
 		}
 		return nil, err
 	}
-	if !envOk {
+	if envSize == nil {
 		return size, err
 	}
 
