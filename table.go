@@ -2,12 +2,29 @@
 
 package termtables
 
+import (
+	"strings"
+
+	"github.com/apcera/termtables/locale"
+	"github.com/apcera/termtables/term"
+)
+
 var useUTF8ByDefault = false
 
+// MaxColumns represents the maximum number of columns that are available for
+// display without wrapping around the right-hand side of the terminal window.
+// At program initialization, the value will be automatically set according
+// to available sources of information, including the $COLUMNS environment
+// variable and, on Unix, tty information.
+var MaxColumns = 80
+
+// An Element is a drawn representation of the contents of a table cell.
 type Element interface {
 	Render(*renderStyle) string
 }
 
+// Table represents a terminal table.  The Style can be directly accessed
+// and manipulated; all other access is via methods.
 type Table struct {
 	Style *TableStyle
 
@@ -17,10 +34,30 @@ type Table struct {
 	title    interface{}
 }
 
+// EnableUTF8 will unconditionally enable using UTF-8 box-drawing characters
+// for any tables created after this call, as the default style.
 func EnableUTF8() {
 	useUTF8ByDefault = true
 }
 
+// EnableUTF8PerLocale will use current locale character map information to
+// determine if UTF-8 is expected and, if so, is equivalent to EnableUTF8.
+func EnableUTF8PerLocale() {
+	charmap := locale.GetCharmap()
+	if strings.EqualFold(charmap, "UTF-8") {
+		useUTF8ByDefault = true
+	}
+}
+
+func init() {
+	// do not enable UTF-8 per locale by default, breaks tests
+	sz, err := term.GetSize()
+	if err == nil && sz.Columns != 0 {
+		MaxColumns = sz.Columns
+	}
+}
+
+// CreateTable creates an empty Table using defaults for style.
 func CreateTable() *Table {
 	t := &Table{elements: []Element{}, Style: DefaultStyle}
 	if useUTF8ByDefault {
@@ -29,30 +66,40 @@ func CreateTable() *Table {
 	return t
 }
 
+// AddSeparator adds a line to the table content, where the line
+// consists of separator characters.
 func (t *Table) AddSeparator() {
 	t.elements = append(t.elements, &Separator{})
 }
 
+// AddRow adds the supplied items as cells in one row of the table.
 func (t *Table) AddRow(items ...interface{}) *Row {
 	row := CreateRow(items)
 	t.elements = append(t.elements, row)
 	return row
 }
 
+// AddTitle supplies a table title, which if present will be rendered as
+// one cell across the width of the table, as the first row.
 func (t *Table) AddTitle(title interface{}) {
 	t.title = title
 
 	t.minWidth = len(renderValue(title))
 }
 
+// AddHeaders supplies column headers for the table.
 func (t *Table) AddHeaders(headers ...interface{}) {
 	t.headers = headers[:]
 }
 
+// UTF8Box sets the table style to use UTF-8 box-drawing characters,
+// overriding all relevant style elements at the time of the call.
 func (t *Table) UTF8Box() {
 	t.Style.setUtfBoxStyle()
 }
 
+// Render returns a string representation of a fully rendered table, drawn
+// out for display, with embedded newlines.
 func (t *Table) Render() (buffer string) {
 	// elements is already populated with row data
 

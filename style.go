@@ -4,12 +4,16 @@ package termtables
 
 type tableAlignment int
 
+// These constants control the alignment which should be used when rendering
+// the content of a cell.
 const (
 	AlignLeft   = tableAlignment(1)
 	AlignCenter = tableAlignment(2)
 	AlignRight  = tableAlignment(3)
 )
 
+// TableStyle controls styling information for a Table as a whole.
+//
 // For the Border rules, only X, Y and I are needed, and all have defaults.
 // The others will all default to the same as BorderI.
 type TableStyle struct {
@@ -31,17 +35,27 @@ type TableStyle struct {
 	Alignment         tableAlignment
 }
 
+// A CellStyle controls all style applicable to one Cell.
 type CellStyle struct {
+	// Alignment indicates the alignment to be used in rendering the content
 	Alignment tableAlignment
-	ColSpan   int
+
+	// ColSpan indicates how many columns this Cell is expected to consume.
+	ColSpan int
 }
 
+// DefaultStyle is a TableStyle which can be used to get some simple
+// default styling for a table, using ASCII characters for drawing borders.
 var DefaultStyle = &TableStyle{
 	SkipBorder: false,
 	BorderX:    "-", BorderY: "|", BorderI: "+",
 	PaddingLeft: 1, PaddingRight: 1,
 	Width:     80,
 	Alignment: AlignLeft,
+
+	// FIXME: the use of a Width here may interact poorly with a changing
+	// MaxColumns value; we don't set MaxColumns here because the evaluation
+	// order of a var and an init value adds undesired subtlety.
 }
 
 type renderStyle struct {
@@ -50,6 +64,8 @@ type renderStyle struct {
 	TableStyle
 }
 
+// setUtfBoxStyle changes the border characters to be suitable for use when
+// the output stream can render UTF-8 characters.
 func (s *TableStyle) setUtfBoxStyle() {
 	s.BorderX = "─"
 	s.BorderY = "│"
@@ -64,6 +80,8 @@ func (s *TableStyle) setUtfBoxStyle() {
 	s.BorderBottomRight = "╯"
 }
 
+// fillStyleRules populates members of the TableStyle box-drawing specification
+// with BorderI as the default.
 func (s *TableStyle) fillStyleRules() {
 	if s.BorderTop == "" {
 		s.BorderTop = s.BorderI
@@ -140,6 +158,8 @@ func createRenderStyle(table *Table) *renderStyle {
 	return style
 }
 
+// CellWidth returns the width of the cell at the supplied index, where the
+// width is the number of tty character-cells required to draw the glyphs.
 func (s *renderStyle) CellWidth(i int) int {
 	return s.cellWidths[i]
 }

@@ -10,6 +10,10 @@ import (
 	"unicode/utf8"
 )
 
+// A Cell denotes one cell of a table; it spans one row and a variable number
+// of columns.  A given Cell can only be used at one place in a table; the act
+// of adding the Cell to the table mutates it with position information, so
+// do not create one "const" Cell to add it multiple times.
 type Cell struct {
 	column         int
 	formattedValue string
@@ -17,6 +21,11 @@ type Cell struct {
 	colSpan        int
 }
 
+// CreateCell returns a Cell where the content is the supplied value, with the
+// optional supplied style (which may be given as nil).  The style can include
+// a non-zero ColSpan to cause the cell to become column-spanning.  Changing
+// the style afterwards will not adjust the column-spanning state of the cell
+// itself.
 func CreateCell(v interface{}, style *CellStyle) *Cell {
 	return createCell(0, v, style)
 }
@@ -32,10 +41,19 @@ func createCell(column int, v interface{}, style *CellStyle) *Cell {
 	return cell
 }
 
+// Width returns the width of the content of the cell, measured in runes; if
+// each rune is a single rendering glyph and not "wide", then this is
+// sufficient to calculate the width for rendering purposes.  This will fail
+// on more sophisticated Unicode; in which case, this is the place to plug in
+// better logic for "measuring" the display width.  Around about then, you
+// run into some fundamental limitations of a cell grid display model as is
+// used in ttys.
 func (c *Cell) Width() int {
 	return utf8.RuneCountInString(c.formattedValue)
 }
 
+// Render returns a string representing the content of the cell, together with
+// padding (to the widths specified) and handling any alignment.
 func (c *Cell) Render(style *renderStyle) (buffer string) {
 	// if no alignment is set, import the table's default
 	if c.alignment == nil {
