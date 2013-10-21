@@ -15,6 +15,7 @@ func main() {
 	size, err := term.GetSize()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed: %s\n", err)
+		os.Exit(1)
 	}
 
 	fmt.Printf("Lines %d  Columns %d\n", size.Lines, size.Columns)

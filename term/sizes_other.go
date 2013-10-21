@@ -1,6 +1,6 @@
 // Copyright 2013 Apcera Inc. All rights reserved.
 
-// +build !cgo windows linux
+// +build !cgo windows
 
 package term
 

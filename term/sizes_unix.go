@@ -1,11 +1,12 @@
 // Copyright 2013 Apcera Inc. All rights reserved.
 
-// +build cgo,!windows,!linux
+// +build cgo,!windows
 
 package term
 
 /*
 #include <termios.h>
+#include <sys/ioctl.h>
 
 // provides struct winsize *, with:
 //    ws_row, ws_col, ws_xpixel, ws_ypixel
