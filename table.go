@@ -1,4 +1,4 @@
-// Copyright 2012 Apcera Inc. All rights reserved.
+// Copyright 2012-2013 Apcera Inc. All rights reserved.
 
 package termtables
 
@@ -10,6 +10,7 @@ import (
 )
 
 var useUTF8ByDefault = false
+var useHTMLByDefault = false
 
 // MaxColumns represents the maximum number of columns that are available for
 // display without wrapping around the right-hand side of the terminal window.
@@ -23,21 +24,37 @@ type Element interface {
 	Render(*renderStyle) string
 }
 
+type outputMode int
+
+const (
+	outputTerminal outputMode = iota
+	outputHTML
+)
+
 // Table represents a terminal table.  The Style can be directly accessed
 // and manipulated; all other access is via methods.
 type Table struct {
 	Style *TableStyle
 
-	elements []Element
-	minWidth int
-	headers  []interface{}
-	title    interface{}
+	elements   []Element
+	minWidth   int
+	headers    []interface{}
+	title      interface{}
+	outputMode outputMode
 }
 
 // EnableUTF8 will unconditionally enable using UTF-8 box-drawing characters
 // for any tables created after this call, as the default style.
 func EnableUTF8() {
 	useUTF8ByDefault = true
+}
+
+// SetModeHTML will control whether or not new tables generated will be in HTML
+// mode by default; HTML-or-not takes precedence over options which control how
+// a terminal output will be rendered, such as whether or not to use UTF8.
+// This affects any tables created after this call.
+func SetModeHTML(onoff bool) {
+	useHTMLByDefault = onoff
 }
 
 // EnableUTF8PerLocale will use current locale character map information to
@@ -62,6 +79,9 @@ func CreateTable() *Table {
 	t := &Table{elements: []Element{}, Style: DefaultStyle}
 	if useUTF8ByDefault {
 		t.Style.setUtfBoxStyle()
+	}
+	if useHTMLByDefault {
+		t.outputMode = outputHTML
 	}
 	return t
 }
@@ -98,11 +118,36 @@ func (t *Table) UTF8Box() {
 	t.Style.setUtfBoxStyle()
 }
 
+// SetModeHTML will control whether or not this table will be emitted as
+// HTML when rendered; the default depends upon whether the package function
+// SetModeHTML() has been called, and with what value.  This method controls
+// the same functionality, but on a per-table basis.
+func (t *Table) SetModeHTML(onoff bool) {
+	if onoff {
+		t.outputMode = outputHTML
+	} else {
+		t.outputMode = outputTerminal
+	}
+}
+
 // Render returns a string representation of a fully rendered table, drawn
-// out for display, with embedded newlines.
+// out for display, with embedded newlines.  If this table is in HTML mode,
+// then this is equivalent to RenderHTML().
 func (t *Table) Render() (buffer string) {
 	// elements is already populated with row data
+	switch t.outputMode {
+	case outputTerminal:
+		return t.renderTerminal()
+	case outputHTML:
+		return t.RenderHTML()
+	default:
+		panic("unknown output mode set")
+	}
+}
 
+// renderTerminal returns a string representation of a fully rendered table,
+// drawn out for display, with embedded newlines.
+func (t *Table) renderTerminal() (buffer string) {
 	// initial top line
 	if !t.Style.SkipBorder {
 		if t.title != nil && t.headers == nil {
