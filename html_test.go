@@ -16,7 +16,7 @@ func TestCreateTableHTML(t *testing.T) {
 		"</table>\n"
 
 	table := CreateTable()
-	table.SetModeHTML(true)
+	table.SetModeHTML()
 
 	table.AddHeaders("Name", "Value")
 	table.AddRow("hey", "you")
@@ -41,7 +41,7 @@ func TestTableWithHeaderHTML(t *testing.T) {
 		"</table>\n"
 
 	table := CreateTable()
-	table.SetModeHTML(true)
+	table.SetModeHTML()
 
 	table.AddTitle("Example")
 	table.AddHeaders("Name", "Value")
@@ -67,7 +67,7 @@ func TestTableTitleWidthAdjustsHTML(t *testing.T) {
 		"</table>\n"
 
 	table := CreateTable()
-	table.SetModeHTML(true)
+	table.SetModeHTML()
 
 	table.AddTitle("Example My Foo Bar'd Test")
 	table.AddHeaders("Name", "Value")
@@ -91,7 +91,7 @@ func TestTableWithNoHeadersHTML(t *testing.T) {
 		"</table>\n"
 
 	table := CreateTable()
-	table.SetModeHTML(true)
+	table.SetModeHTML()
 
 	table.AddRow("hey", "you")
 	table.AddRow("ken", 1234)
@@ -114,7 +114,7 @@ func TestTableUnicodeWidthsHTML(t *testing.T) {
 		"</table>\n"
 
 	table := CreateTable()
-	table.SetModeHTML(true)
+	table.SetModeHTML()
 	table.AddHeaders("Name", "Cost")
 	table.AddRow("Currency", "¤10")
 	table.AddRow("US Dollar", "$30")

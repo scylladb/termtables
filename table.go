@@ -9,9 +9,6 @@ import (
 	"github.com/apcera/termtables/term"
 )
 
-var useUTF8ByDefault = false
-var useHTMLByDefault = false
-
 // MaxColumns represents the maximum number of columns that are available for
 // display without wrapping around the right-hand side of the terminal window.
 // At program initialization, the value will be automatically set according
@@ -28,8 +25,20 @@ type outputMode int
 
 const (
 	outputTerminal outputMode = iota
+	outputMarkdown
 	outputHTML
 )
+
+// open question: should UTF-8 become an output mode?  It does require more
+// tracking when resetting, if the locale-enabling had been used
+
+var outputsEnabled struct {
+	UTF8     bool
+	HTML     bool
+	Markdown bool
+}
+
+var defaultOutputMode outputMode = outputTerminal
 
 // Table represents a terminal table.  The Style can be directly accessed
 // and manipulated; all other access is via methods.
@@ -46,7 +55,7 @@ type Table struct {
 // EnableUTF8 will unconditionally enable using UTF-8 box-drawing characters
 // for any tables created after this call, as the default style.
 func EnableUTF8() {
-	useUTF8ByDefault = true
+	outputsEnabled.UTF8 = true
 }
 
 // SetModeHTML will control whether or not new tables generated will be in HTML
@@ -54,7 +63,15 @@ func EnableUTF8() {
 // a terminal output will be rendered, such as whether or not to use UTF8.
 // This affects any tables created after this call.
 func SetModeHTML(onoff bool) {
-	useHTMLByDefault = onoff
+	outputsEnabled.HTML = onoff
+	chooseDefaultOutput()
+}
+
+// SetModeMarkdown will control whether or not new tables generated will be
+// in Markdown mode by default.  HTML-mode takes precedence.
+func SetModeMarkdown(onoff bool) {
+	outputsEnabled.Markdown = onoff
+	chooseDefaultOutput()
 }
 
 // EnableUTF8PerLocale will use current locale character map information to
@@ -62,7 +79,22 @@ func SetModeHTML(onoff bool) {
 func EnableUTF8PerLocale() {
 	charmap := locale.GetCharmap()
 	if strings.EqualFold(charmap, "UTF-8") {
-		useUTF8ByDefault = true
+		EnableUTF8()
+	}
+}
+
+// chooseDefaultOutput sets defaultOutputMode based on priority
+// choosing amongst the options which are enabled.  Pros: simpler
+// encapsulation; cons: setting markdown doesn't disable HTML if
+// HTML was previously enabled and was later disabled.
+// This seems fairly reasonable.
+func chooseDefaultOutput() {
+	if outputsEnabled.HTML {
+		defaultOutputMode = outputHTML
+	} else if outputsEnabled.Markdown {
+		defaultOutputMode = outputMarkdown
+	} else {
+		defaultOutputMode = outputTerminal
 	}
 }
 
@@ -77,12 +109,10 @@ func init() {
 // CreateTable creates an empty Table using defaults for style.
 func CreateTable() *Table {
 	t := &Table{elements: []Element{}, Style: DefaultStyle}
-	if useUTF8ByDefault {
+	if outputsEnabled.UTF8 {
 		t.Style.setUtfBoxStyle()
 	}
-	if useHTMLByDefault {
-		t.outputMode = outputHTML
-	}
+	t.outputMode = defaultOutputMode
 	return t
 }
 
@@ -118,16 +148,22 @@ func (t *Table) UTF8Box() {
 	t.Style.setUtfBoxStyle()
 }
 
-// SetModeHTML will control whether or not this table will be emitted as
-// HTML when rendered; the default depends upon whether the package function
-// SetModeHTML() has been called, and with what value.  This method controls
-// the same functionality, but on a per-table basis.
-func (t *Table) SetModeHTML(onoff bool) {
-	if onoff {
-		t.outputMode = outputHTML
-	} else {
-		t.outputMode = outputTerminal
-	}
+// SetModeHTML switches this table to be in HTML when rendered; the
+// default depends upon whether the package function SetModeHTML() has been
+// called, and with what value.  This method forces the feature on for this
+// table.  Turning off involves choosing a different mode, per-table.
+func (t *Table) SetModeHTML() {
+	t.outputMode = outputHTML
+}
+
+// SetModeMarkdown switches this table to be in Markdown mode
+func (t *Table) SetModeMarkdown() {
+	t.outputMode = outputMarkdown
+}
+
+// SetModeTerminal switches this table to be in terminal mode
+func (t *Table) SetModeTerminal() {
+	t.outputMode = outputTerminal
 }
 
 // Render returns a string representation of a fully rendered table, drawn
@@ -138,6 +174,8 @@ func (t *Table) Render() (buffer string) {
 	switch t.outputMode {
 	case outputTerminal:
 		return t.renderTerminal()
+	case outputMarkdown:
+		return t.renderMarkdown()
 	case outputHTML:
 		return t.RenderHTML()
 	default:
@@ -175,6 +213,7 @@ func (t *Table) renderTerminal() (buffer string) {
 	if t.title != nil {
 		ne := []Element{
 			&StraightSeparator{where: LINE_TOP},
+			// match changes to this into renderMarkdown too
 			CreateRow([]interface{}{CreateCell(t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})}),
 		}
 		t.elements = append(ne, t.elements...)
@@ -191,6 +230,61 @@ func (t *Table) renderTerminal() (buffer string) {
 	// add bottom line
 	if !style.SkipBorder {
 		buffer += (&Separator{where: LINE_BOTTOM}).Render(style) + "\n"
+	}
+
+	return buffer
+}
+
+// renderMarkdown returns a string representation of a table in Markdown
+// markup format using GitHub Flavored Markdown's notation (since tables
+// are not in the core Markdown spec).
+func (t *Table) renderMarkdown() (buffer string) {
+	// We need ASCII drawing characters; we need a line after the header;
+	// *do* need a header!  Do not need to markdown-escape contents of
+	// tables as markdown is ignored in there.  Do need to do _something_
+	// with a '|' character shown as a member of a table.
+
+	t.Style.setAsciiBoxStyle()
+
+	firstLines := make([]Element, 0, 2)
+
+	if t.headers == nil {
+		initial := createRenderStyle(t)
+		if initial.columns > 1 {
+			row := CreateRow([]interface{}{})
+			for i := 0; i < initial.columns; i++ {
+				row.AddCell(CreateCell(i+1, &CellStyle{}))
+			}
+		}
+	}
+
+	firstLines = append(firstLines, CreateRow(t.headers))
+	// this is a dummy line, swapped out below:
+	firstLines = append(firstLines, firstLines[0])
+	t.elements = append(firstLines, t.elements...)
+	// generate the runtime style
+	style := createRenderStyle(t)
+	// we know that the second line is a dummy, we can replace it
+	mdRow := CreateRow([]interface{}{})
+	for i := 0; i < style.columns; i++ {
+		mdRow.AddCell(CreateCell(strings.Repeat("-", style.cellWidths[i]), &CellStyle{}))
+	}
+	t.elements[1] = mdRow
+
+	// comes after style is generated, which must come after all
+	// width-affecting changes are in
+	if t.title != nil {
+		// markdown doesn't support titles or column spanning; we _should_
+		// escape the title, but doing that to handle all possible forms of
+		// markup would require a heavy dependency, so we punt.
+		buffer += "Table: " +
+			strings.TrimSpace(CreateCell(t.title, &CellStyle{}).Render(style)) +
+			"\n\n"
+	}
+
+	// loop over the elements and render them
+	for _, e := range t.elements {
+		buffer += e.Render(style) + "\n"
 	}
 
 	return buffer

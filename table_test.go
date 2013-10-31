@@ -13,7 +13,8 @@ func DisplayFailedOutput(actual, expected string) string {
 }
 
 func TestCreateTable(t *testing.T) {
-	expected := "+-----------+-------+\n" +
+	expected := "" +
+		"+-----------+-------+\n" +
 		"| Name      | Value |\n" +
 		"+-----------+-------+\n" +
 		"| hey       | you   |\n" +
@@ -36,8 +37,36 @@ func TestCreateTable(t *testing.T) {
 	}
 }
 
+func TestStyleResets(t *testing.T) {
+	expected := "" +
+		"+-----------+-------+\n" +
+		"| Name      | Value |\n" +
+		"+-----------+-------+\n" +
+		"| hey       | you   |\n" +
+		"| ken       | 1234  |\n" +
+		"| derek     | 3.14  |\n" +
+		"| derek too | 3.15  |\n" +
+		"+-----------+-------+\n"
+
+	table := CreateTable()
+	table.UTF8Box()
+	table.Style.setAsciiBoxStyle()
+
+	table.AddHeaders("Name", "Value")
+	table.AddRow("hey", "you")
+	table.AddRow("ken", 1234)
+	table.AddRow("derek", 3.14)
+	table.AddRow("derek too", 3.1456788)
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}
+
 func TestTableWithHeader(t *testing.T) {
-	expected := "+-------------------+\n" +
+	expected := "" +
+		"+-------------------+\n" +
 		"|      Example      |\n" +
 		"+-----------+-------+\n" +
 		"| Name      | Value |\n" +
@@ -64,7 +93,8 @@ func TestTableWithHeader(t *testing.T) {
 }
 
 func TestTableTitleWidthAdjusts(t *testing.T) {
-	expected := "+--------------------------------+\n" +
+	expected := "" +
+		"+--------------------------------+\n" +
 		"|   Example My Foo Bar'd Test    |\n" +
 		"+-----------+--------------------+\n" +
 		"| Name      | Value              |\n" +
@@ -90,8 +120,28 @@ func TestTableTitleWidthAdjusts(t *testing.T) {
 	}
 }
 
+func TestTableHeaderWidthAdjusts(t *testing.T) {
+	expected := "" +
+		"+---------------+---------------------+\n" +
+		"| Slightly Long | More than 2 columns |\n" +
+		"+---------------+---------------------+\n" +
+		"| a             | b                   |\n" +
+		"+---------------+---------------------+\n"
+
+	table := CreateTable()
+
+	table.AddHeaders("Slightly Long", "More than 2 columns")
+	table.AddRow("a", "b")
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}
+
 func TestTableWithNoHeaders(t *testing.T) {
-	expected := "+-----------+------+\n" +
+	expected := "" +
+		"+-----------+------+\n" +
 		"| hey       | you  |\n" +
 		"| ken       | 1234 |\n" +
 		"| derek     | 3.14 |\n" +
@@ -112,7 +162,8 @@ func TestTableWithNoHeaders(t *testing.T) {
 }
 
 func TestTableUnicodeWidths(t *testing.T) {
-	expected := "+-----------+------+\n" +
+	expected := "" +
+		"+-----------+------+\n" +
 		"| Name      | Cost |\n" +
 		"+-----------+------+\n" +
 		"| Currency  | ¤10  |\n" +
@@ -127,6 +178,57 @@ func TestTableUnicodeWidths(t *testing.T) {
 	table.AddRow("US Dollar", "$30")
 	table.AddRow("Euro", "€27")
 	table.AddRow("Thai", "฿70")
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}
+
+func TestTableInUTF8(t *testing.T) {
+	expected := "" +
+		"╭───────────────────╮\n" +
+		"│      Example      │\n" +
+		"├───────────┬───────┤\n" +
+		"│ Name      │ Value │\n" +
+		"├───────────┼───────┤\n" +
+		"│ hey       │ you   │\n" +
+		"│ ken       │ 1234  │\n" +
+		"│ derek     │ 3.14  │\n" +
+		"│ derek too │ 3.15  │\n" +
+		"╰───────────┴───────╯\n"
+
+	table := CreateTable()
+	table.UTF8Box()
+
+	table.AddTitle("Example")
+	table.AddHeaders("Name", "Value")
+	table.AddRow("hey", "you")
+	table.AddRow("ken", 1234)
+	table.AddRow("derek", 3.14)
+	table.AddRow("derek too", 3.1456788)
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}
+
+func TestTableInMarkdown(t *testing.T) {
+	expected := "" +
+		"Table: Example\n\n" +
+		"| Name  | Value |\n" +
+		"| ----- | ----- |\n" +
+		"| hey   | you   |\n" +
+		"| a &#x7c; b | esc   |\n"
+
+	table := CreateTable()
+	table.SetModeMarkdown()
+
+	table.AddTitle("Example")
+	table.AddHeaders("Name", "Value")
+	table.AddRow("hey", "you")
+	table.AddRow("a | b", "esc")
 
 	output := table.Render()
 	if output != expected {

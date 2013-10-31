@@ -1,6 +1,11 @@
-// Copyright 2012 Apcera Inc. All rights reserved.
+// Copyright 2012-2013 Apcera Inc. All rights reserved.
 
 package termtables
+
+import (
+	"fmt"
+	"strings"
+)
 
 type tableAlignment int
 
@@ -61,6 +66,10 @@ var DefaultStyle = &TableStyle{
 type renderStyle struct {
 	cellWidths map[int]int
 	columns    int
+
+	// used for markdown rendering
+	replaceContent func(string) string
+
 	TableStyle
 }
 
@@ -78,6 +87,16 @@ func (s *TableStyle) setUtfBoxStyle() {
 	s.BorderTopRight = "╮"
 	s.BorderBottomLeft = "╰"
 	s.BorderBottomRight = "╯"
+}
+
+// setAsciiBoxStyle changes the border characters back to their defaults
+func (s *TableStyle) setAsciiBoxStyle() {
+	s.BorderX = "-"
+	s.BorderY = "|"
+	s.BorderI = "+"
+	s.BorderTop, s.BorderBottom, s.BorderLeft, s.BorderRight = "", "", "", ""
+	s.BorderTopLeft, s.BorderTopRight, s.BorderBottomLeft, s.BorderBottomRight = "", "", "", ""
+	s.fillStyleRules()
 }
 
 // fillStyleRules populates members of the TableStyle box-drawing specification
@@ -112,6 +131,10 @@ func (s *TableStyle) fillStyleRules() {
 func createRenderStyle(table *Table) *renderStyle {
 	style := &renderStyle{TableStyle: *table.Style, cellWidths: map[int]int{}}
 	style.TableStyle.fillStyleRules()
+
+	if table.outputMode == outputMarkdown {
+		style.buildReplaceContent(table.Style.BorderY)
+	}
 
 	// FIXME: handle actually defined width condition
 
@@ -162,4 +185,13 @@ func createRenderStyle(table *Table) *renderStyle {
 // width is the number of tty character-cells required to draw the glyphs.
 func (s *renderStyle) CellWidth(i int) int {
 	return s.cellWidths[i]
+}
+
+// buildReplaceContent creates a function closure, with minimal bound lexical
+// state, which replaces content
+func (s *renderStyle) buildReplaceContent(bad string) {
+	replacement := fmt.Sprintf("&#x%02x;", bad)
+	s.replaceContent = func(old string) string {
+		return strings.Replace(old, bad, replacement, -1)
+	}
 }

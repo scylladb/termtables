@@ -69,6 +69,12 @@ func (c *Cell) Render(style *renderStyle) (buffer string) {
 	// right padding
 	buffer += strings.Repeat(" ", style.PaddingRight)
 
+	// this handles escaping for, eg, Markdown, where we don't care about the
+	// alignment quite as much
+	if style.replaceContent != nil {
+		buffer = style.replaceContent(buffer)
+	}
+
 	return buffer
 }
 
