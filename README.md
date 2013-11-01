@@ -70,10 +70,16 @@ The table method `.AddTitle()` adds a title to the table; in terminal output,
 this is an initial row; in HTML, it's a caption.  In Markdown, it's a line of
 text before the table, prefixed by `Table: `.
 
+The table method `.SetAlign()` takes an alignment and a column number
+(indexing starts at 1) and changes all _current_ cells in that column to have
+the given alignment.  It does not change the alignment of cells added to the
+table after this call.  Alignment is only stored on a per-cell basis.
+
 ## Known Issues
 
 Normal output:
 
+* `.SetAlign()` does not affect headers.
 
 Markdown output mode:
 

@@ -142,6 +142,25 @@ func (t *Table) AddHeaders(headers ...interface{}) {
 	t.headers = headers[:]
 }
 
+// SetAlign changes the alignment for elements in a column of the table;
+// alignments are stored with each cell, so cells added after a call to
+// SetAlign will not pick up the change.  Columns are numbered from 1.
+func (t *Table) SetAlign(align tableAlignment, column int) {
+	if column < 0 {
+		return
+	}
+	for i := range t.elements {
+		row, ok := t.elements[i].(*Row)
+		if !ok {
+			continue
+		}
+		if column >= len(row.cells) {
+			continue
+		}
+		row.cells[column-1].alignment = &align
+	}
+}
+
 // UTF8Box sets the table style to use UTF-8 box-drawing characters,
 // overriding all relevant style elements at the time of the call.
 func (t *Table) UTF8Box() {

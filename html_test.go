@@ -8,10 +8,10 @@ import (
 
 func TestCreateTableHTML(t *testing.T) {
 	expected := "<table>\n" +
-		"<tr><th>Name     </th><th>Value</th></tr>\n" +
-		"<tr><td>hey      </td><td>you </td></tr>\n" +
-		"<tr><td>ken      </td><td>1234</td></tr>\n" +
-		"<tr><td>derek    </td><td>3.14</td></tr>\n" +
+		"<tr><th>Name</th><th>Value</th></tr>\n" +
+		"<tr><td>hey</td><td>you</td></tr>\n" +
+		"<tr><td>ken</td><td>1234</td></tr>\n" +
+		"<tr><td>derek</td><td>3.14</td></tr>\n" +
 		"<tr><td>derek too</td><td>3.15</td></tr>\n" +
 		"</table>\n"
 
@@ -33,10 +33,10 @@ func TestCreateTableHTML(t *testing.T) {
 func TestTableWithHeaderHTML(t *testing.T) {
 	expected := "<table>\n" +
 		"<caption>Example</caption>\n" +
-		"<tr><th>Name     </th><th>Value</th></tr>\n" +
-		"<tr><td>hey      </td><td>you </td></tr>\n" +
-		"<tr><td>ken      </td><td>1234</td></tr>\n" +
-		"<tr><td>derek    </td><td>3.14</td></tr>\n" +
+		"<tr><th>Name</th><th>Value</th></tr>\n" +
+		"<tr><td>hey</td><td>you</td></tr>\n" +
+		"<tr><td>ken</td><td>1234</td></tr>\n" +
+		"<tr><td>derek</td><td>3.14</td></tr>\n" +
 		"<tr><td>derek too</td><td>3.15</td></tr>\n" +
 		"</table>\n"
 
@@ -59,11 +59,11 @@ func TestTableWithHeaderHTML(t *testing.T) {
 func TestTableTitleWidthAdjustsHTML(t *testing.T) {
 	expected := "<table>\n" +
 		"<caption>Example My Foo Bar&#39;d Test</caption>\n" +
-		"<tr><th>Name     </th><th>Value              </th></tr>\n" +
-		"<tr><td>hey      </td><td>you                </td></tr>\n" +
-		"<tr><td>ken      </td><td>1234               </td></tr>\n" +
-		"<tr><td>derek    </td><td>3.14               </td></tr>\n" +
-		"<tr><td>derek too</td><td>3.15               </td></tr>\n" +
+		"<tr><th>Name</th><th>Value</th></tr>\n" +
+		"<tr><td>hey</td><td>you</td></tr>\n" +
+		"<tr><td>ken</td><td>1234</td></tr>\n" +
+		"<tr><td>derek</td><td>3.14</td></tr>\n" +
+		"<tr><td>derek too</td><td>3.15</td></tr>\n" +
 		"</table>\n"
 
 	table := CreateTable()
@@ -84,9 +84,9 @@ func TestTableTitleWidthAdjustsHTML(t *testing.T) {
 
 func TestTableWithNoHeadersHTML(t *testing.T) {
 	expected := "<table>\n" +
-		"<tr><td>hey      </td><td>you </td></tr>\n" +
-		"<tr><td>ken      </td><td>1234</td></tr>\n" +
-		"<tr><td>derek    </td><td>3.14</td></tr>\n" +
+		"<tr><td>hey</td><td>you</td></tr>\n" +
+		"<tr><td>ken</td><td>1234</td></tr>\n" +
+		"<tr><td>derek</td><td>3.14</td></tr>\n" +
 		"<tr><td>derek too</td><td>3.15</td></tr>\n" +
 		"</table>\n"
 
@@ -106,11 +106,11 @@ func TestTableWithNoHeadersHTML(t *testing.T) {
 
 func TestTableUnicodeWidthsHTML(t *testing.T) {
 	expected := "<table>\n" +
-		"<tr><th>Name     </th><th>Cost</th></tr>\n" +
-		"<tr><td>Currency </td><td>¤10</td></tr>\n" +
+		"<tr><th>Name</th><th>Cost</th></tr>\n" +
+		"<tr><td>Currency</td><td>¤10</td></tr>\n" +
 		"<tr><td>US Dollar</td><td>$30</td></tr>\n" +
-		"<tr><td>Euro     </td><td>€27</td></tr>\n" +
-		"<tr><td>Thai     </td><td>฿70</td></tr>\n" +
+		"<tr><td>Euro</td><td>€27</td></tr>\n" +
+		"<tr><td>Thai</td><td>฿70</td></tr>\n" +
 		"</table>\n"
 
 	table := CreateTable()
@@ -120,6 +120,47 @@ func TestTableUnicodeWidthsHTML(t *testing.T) {
 	table.AddRow("US Dollar", "$30")
 	table.AddRow("Euro", "€27")
 	table.AddRow("Thai", "฿70")
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}
+
+func TestTableWithAlignment(t *testing.T) {
+	expected := "<table>\n" +
+		"<tr><th>Foo</th><th>Bar</th></tr>\n" +
+		"<tr><td>humpty</td><td>dumpty</td></tr>\n" +
+		"<tr><td align='right'>r</td><td>&lt;- on right</td></tr>\n" +
+		"</table>\n"
+
+	table := CreateTable()
+	table.SetModeHTML()
+	table.AddHeaders("Foo", "Bar")
+	table.AddRow("humpty", "dumpty")
+	table.AddRow(CreateCell("r", &CellStyle{Alignment: AlignRight}), "<- on right")
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}
+
+func TestTableAfterSetAlign(t *testing.T) {
+	expected := "<table>\n" +
+		"<tr><th>Alphabetical</th><th>Num</th></tr>\n" +
+		"<tr><td align='right'>alfa</td><td>1</td></tr>\n" +
+		"<tr><td align='right'>bravo</td><td>2</td></tr>\n" +
+		"<tr><td align='right'>charlie</td><td>3</td></tr>\n" +
+		"</table>\n"
+
+	table := CreateTable()
+	table.SetModeHTML()
+	table.AddHeaders("Alphabetical", "Num")
+	table.AddRow("alfa", 1)
+	table.AddRow("bravo", 2)
+	table.AddRow("charlie", 3)
+	table.SetAlign(AlignRight, 1)
 
 	output := table.Render()
 	if output != expected {

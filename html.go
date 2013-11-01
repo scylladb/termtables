@@ -3,6 +3,7 @@
 package termtables
 
 import (
+	"bytes"
 	"fmt"
 	"html"
 	"strings"
@@ -10,15 +11,29 @@ import (
 
 // HTML returns an HTML representations of the contents of one row of a table.
 func (r *Row) HTML(tag string, style *renderStyle) string {
-	joiner := "</" + tag + "><" + tag + ">"
+	attrs := make([]string, len(r.cells))
 	elems := make([]string, len(r.cells))
 	for i := range r.cells {
-		// if we add a style for HTML mode which doesn't pad, then the
-		// least intrusive method will be to just render as normal but
-		// then strings.TrimSpace() it here:
-		elems[i] = html.EscapeString(r.cells[i].Render(style))
+		if r.cells[i].alignment != nil {
+			switch *r.cells[i].alignment {
+			case AlignLeft:
+				attrs[i] = " align='left'"
+			case AlignCenter:
+				attrs[i] = " align='center'"
+			case AlignRight:
+				attrs[i] = " align='right'"
+			}
+		}
+		elems[i] = html.EscapeString(strings.TrimSpace(r.cells[i].Render(style)))
 	}
-	return "<tr><" + tag + ">" + strings.Join(elems, joiner) + "</" + tag + "></tr>\n"
+	// WAG as to max capacity, plus a bit
+	buf := bytes.NewBuffer(make([]byte, 0, 8192))
+	buf.WriteString("<tr>")
+	for i := range elems {
+		fmt.Fprintf(buf, "<%s%s>%s</%s>", tag, attrs[i], elems[i], tag)
+	}
+	buf.WriteString("</tr>\n")
+	return buf.String()
 }
 
 // RenderHTML returns a string representation of a the table, suitable for
