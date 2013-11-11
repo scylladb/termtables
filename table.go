@@ -4,6 +4,7 @@ package termtables
 
 import (
 	"strings"
+	"unicode/utf8"
 
 	"github.com/apcera/termtables/locale"
 	"github.com/apcera/termtables/term"
@@ -134,7 +135,7 @@ func (t *Table) AddRow(items ...interface{}) *Row {
 func (t *Table) AddTitle(title interface{}) {
 	t.title = title
 
-	t.minWidth = len(renderValue(title))
+	t.minWidth = utf8.RuneCountInString(renderValue(title))
 }
 
 // AddHeaders supplies column headers for the table.
