@@ -1,3 +1,4 @@
+// Copyright 2012-2013 Apcera Inc. All rights reserved.
 package termtables
 
 import (
@@ -244,4 +245,60 @@ func TestTitleUnicodeWidths(t *testing.T) {
 	table.AddRow("e", 3)
 
 	checkRendersTo(t, table, expected)
+}
+
+// We identified two error conditions wherein length wrapping would not correctly
+// wrap width when, for instance, in a two-column table, the longest row in the
+// right-hand column was not the same as the longest row in the left-hand column.
+// This tests that we correctly accumulate the maximum width across all rows of
+// the termtable and adjust width accordingly.
+func TestTableWidthHandling(t *testing.T) {
+	expected := "" +
+		"+-----------------------------------------+\n" +
+		"|        Example... to Fix My Test        |\n" +
+		"+-----------------+-----------------------+\n" +
+		"| hey foo bar baz | you                   |\n" +
+		"| ken             | you should write code |\n" +
+		"| derek           | 3.14                  |\n" +
+		"| derek too       | 3.15                  |\n" +
+		"+-----------------+-----------------------+\n"
+
+	table := CreateTable()
+
+	table.AddTitle("Example... to Fix My Test")
+	table.AddRow("hey foo bar baz", "you")
+	table.AddRow("ken", "you should write code")
+	table.AddRow("derek", 3.14)
+	table.AddRow("derek too", 3.1456788)
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+
+}
+
+func TestTableWidthHandling_SecondErrorCondition(t *testing.T) {
+	expected := "" +
+		"+----------------------------------------+\n" +
+		"|       Example... to Fix My Test        |\n" +
+		"+-----------------+----------------------+\n" +
+		"| hey foo bar baz | you                  |\n" +
+		"| ken             | you should sell cod! |\n" +
+		"| derek           | 3.14                 |\n" +
+		"| derek too       | 3.15                 |\n" +
+		"+-----------------+----------------------+\n"
+
+	table := CreateTable()
+
+	table.AddTitle("Example... to Fix My Test")
+	table.AddRow("hey foo bar baz", "you")
+	table.AddRow("ken", "you should sell cod!")
+	table.AddRow("derek", 3.14)
+	table.AddRow("derek too", 3.1456788)
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
 }
