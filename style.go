@@ -5,6 +5,7 @@ package termtables
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 type tableAlignment int
@@ -147,9 +148,7 @@ func createRenderStyle(table *Table) *renderStyle {
 
 		// iterate over cells
 		if row, ok := element.(*Row); ok {
-			totalWidth := 0
 			for i, cell := range row.cells {
-				totalWidth = totalWidth + cell.Width()
 				// FIXME: need to support sizing with colspan handling
 				if cell.colSpan > 1 {
 					continue
@@ -157,24 +156,41 @@ func createRenderStyle(table *Table) *renderStyle {
 				if style.cellWidths[i] < cell.Width() {
 					style.cellWidths[i] = cell.Width()
 				}
-				if i == len(row.cells)-1 {
-					if table.minWidth > totalWidth {
-						if style.cellWidths[i] <= cell.Width() {
-							// The minus 3 is to avoid odd numbers of padding on right over left-hand side.
-							style.cellWidths[i] = cell.Width() + table.minWidth - totalWidth - 3
-						}
-					}
-				}
 			}
 		}
 	}
 	style.columns = len(style.cellWidths)
 
 	// calculate actual width
-	width := 1 // start at 1 for left border
-	for _, v := range style.cellWidths {
-		width += v + style.PaddingLeft + style.PaddingRight + 1 // for border
+	width := utf8.RuneCountInString(style.BorderLeft) // start at '1' for left border
+	internalBorderWidth := utf8.RuneCountInString(style.BorderI)
+
+	lastIndex := 0
+	for i, v := range style.cellWidths {
+		width += v + style.PaddingLeft + style.PaddingRight + internalBorderWidth
+		if i > lastIndex {
+			lastIndex = i
+		}
 	}
+	if internalBorderWidth != utf8.RuneCountInString(style.BorderRight) {
+		width += utf8.RuneCountInString(style.BorderRight) - internalBorderWidth
+	}
+
+	if table.titleCell != nil {
+		titleMinWidth := 0 +
+			table.titleCell.Width() +
+			utf8.RuneCountInString(style.BorderLeft) +
+			utf8.RuneCountInString(style.BorderRight) +
+			style.PaddingLeft +
+			style.PaddingRight
+
+		if width < titleMinWidth {
+			// minWidth must be set to include padding of the title, as required
+			style.cellWidths[lastIndex] += (titleMinWidth - width)
+			width = titleMinWidth
+		}
+	}
+
 	// right border is covered in loop
 	style.Width = width
 

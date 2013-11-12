@@ -93,16 +93,16 @@ func TestTableWithHeader(t *testing.T) {
 
 func TestTableTitleWidthAdjusts(t *testing.T) {
 	expected := "" +
-		"+--------------------------------+\n" +
-		"|   Example My Foo Bar'd Test    |\n" +
-		"+-----------+--------------------+\n" +
-		"| Name      | Value              |\n" +
-		"+-----------+--------------------+\n" +
-		"| hey       | you                |\n" +
-		"| ken       | 1234               |\n" +
-		"| derek     | 3.14               |\n" +
-		"| derek too | 3.15               |\n" +
-		"+-----------+--------------------+\n"
+		"+---------------------------+\n" +
+		"| Example My Foo Bar'd Test |\n" +
+		"+-----------+---------------+\n" +
+		"| Name      | Value         |\n" +
+		"+-----------+---------------+\n" +
+		"| hey       | you           |\n" +
+		"| ken       | 1234          |\n" +
+		"| derek     | 3.14          |\n" +
+		"| derek too | 3.15          |\n" +
+		"+-----------+---------------+\n"
 
 	table := CreateTable()
 

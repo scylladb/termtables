@@ -4,7 +4,6 @@ package termtables
 
 import (
 	"strings"
-	"unicode/utf8"
 
 	"github.com/apcera/termtables/locale"
 	"github.com/apcera/termtables/term"
@@ -47,9 +46,9 @@ type Table struct {
 	Style *TableStyle
 
 	elements   []Element
-	minWidth   int
 	headers    []interface{}
 	title      interface{}
+	titleCell  *Cell
 	outputMode outputMode
 }
 
@@ -134,8 +133,6 @@ func (t *Table) AddRow(items ...interface{}) *Row {
 // one cell across the width of the table, as the first row.
 func (t *Table) AddTitle(title interface{}) {
 	t.title = title
-
-	t.minWidth = utf8.RuneCountInString(renderValue(title))
 }
 
 // AddHeaders supplies column headers for the table.
@@ -231,10 +228,11 @@ func (t *Table) renderTerminal() (buffer string) {
 
 	// if we have a title, write them
 	if t.title != nil {
+		// match changes to this into renderMarkdown too
+		t.titleCell = CreateCell(t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})
 		ne := []Element{
 			&StraightSeparator{where: LINE_TOP},
-			// match changes to this into renderMarkdown too
-			CreateRow([]interface{}{CreateCell(t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})}),
+			CreateRow([]interface{}{t.titleCell}),
 		}
 		t.elements = append(ne, t.elements...)
 	}
