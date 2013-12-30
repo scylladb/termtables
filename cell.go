@@ -5,9 +5,25 @@ package termtables
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"strconv"
 	"strings"
 	"unicode/utf8"
+)
+
+var (
+	// Must match SGR escape sequence, which is "CSI Pm m", where the Control
+	// Sequence Introducer (CSI) is "ESC ["; where Pm is "A multiple numeric
+	// parameter composed of any number of single numeric parameters, separated
+	// by ; character(s).  Individual values for the parameters are listed with
+	// Ps" and where Ps is A single (usually optional) numeric parameter,
+	// composed of one of [sic] more digits."
+	//
+	// In practice, the end sequence is usually given as \e[0m but reading that
+	// definition, it's clear that the 0 is optional and some testing confirms
+	// that it is certainly optional with MacOS Terminal 2.3, so we need to
+	// support the string \e[m as a terminator too.
+	colorFilter = regexp.MustCompile(`\033\[(?:\d+(?:;\d+)*)?m`)
 )
 
 // A Cell denotes one cell of a table; it spans one row and a variable number
@@ -49,7 +65,13 @@ func createCell(column int, v interface{}, style *CellStyle) *Cell {
 // run into some fundamental limitations of a cell grid display model as is
 // used in ttys.
 func (c *Cell) Width() int {
-	return utf8.RuneCountInString(c.formattedValue)
+	return utf8.RuneCountInString(filterColorCodes(c.formattedValue))
+}
+
+// Filter out terminal bold/color sequences in a string.
+// This supports only basic bold/color escape sequences.
+func filterColorCodes(s string) string {
+	return colorFilter.ReplaceAllString(s, "")
 }
 
 // Render returns a string representing the content of the cell, together with
