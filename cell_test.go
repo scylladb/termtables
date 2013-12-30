@@ -84,3 +84,28 @@ func TestCellRenderGeneric(t *testing.T) {
 		t.Fatal("Unexpected output:", output)
 	}
 }
+
+func TestFilterColorCodes(t *testing.T) {
+	tests := []struct {
+		in  string
+		out string
+	}{
+		{"abc", "abc"},
+		{"", ""},
+		{"\033[31m\033[0m", ""},
+		{"a\033[31mb\033[0mc", "abc"},
+		{"\033[31mabc\033[0m", "abc"},
+		{"\033[31mfoo\033[0mbar", "foobar"},
+		{"\033[31mfoo\033[mbar", "foobar"},
+		{"\033[31mfoo\033[0;0mbar", "foobar"},
+		{"\033[31;4mfoo\033[0mbar", "foobar"},
+		{"\033[31;4;43mfoo\033[0mbar", "foobar"},
+	}
+	for _, test := range tests {
+		got := filterColorCodes(test.in)
+		if got != test.out {
+			t.Errorf("Invalid color-code filter result; expected %q but got %q from input %q",
+				test.out, got, test.in)
+		}
+	}
+}
