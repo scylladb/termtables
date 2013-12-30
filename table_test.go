@@ -198,6 +198,47 @@ func TestTableInUTF8(t *testing.T) {
 	checkRendersTo(t, table, expected)
 }
 
+func TestTableUnicodeUTF8AndSGR(t *testing.T) {
+	// at present, this mostly just tests that alignment still works
+	expected := "" +
+		"╭───────────────────────╮\n" +
+		"│       \033[1mFanciness\033[0m       │\n" +
+		"├──────────┬────────────┤\n" +
+		"│ \033[31mred\033[0m      │ \033[32mgreen\033[0m      │\n" +
+		"├──────────┼────────────┤\n" +
+		"│ plain    │ text       │\n" +
+		"│ Καλημέρα │ κόσμε      │\n" +
+		"│ \033[1mvery\033[0m     │ \033[4munderlined\033[0m │\n" +
+		"│ a\033[1mb\033[0mc      │ \033[45mmagenta\033[0m    │\n" +
+		"│ \033[31m→\033[0m        │ \033[32m←\033[0m          │\n" +
+		"╰──────────┴────────────╯\n"
+
+	sgred := func(in string, sgrPm string) string {
+		return "\033[" + sgrPm + "m" + in + "\033[0m"
+	}
+	bold := func(in string) string { return sgred(in, "1") }
+
+	table := CreateTable()
+	table.UTF8Box()
+
+	table.AddTitle(bold("Fanciness"))
+	table.AddHeaders(sgred("red", "31"), sgred("green", "32"))
+	table.AddRow("plain", "text")
+	table.AddRow("Καλημέρα", "κόσμε") // from http://plan9.bell-labs.com/sys/doc/utf.html
+	table.AddRow(bold("very"), sgred("underlined", "4"))
+	table.AddRow("a"+bold("b")+"c", sgred("magenta", "45"))
+	table.AddRow(sgred("→", "31"), sgred("←", "32"))
+	// TODO: in future, if we start detecting presence of SGR sequences, we
+	// should ensure that the SGR reset is done at the end of the cell content,
+	// so that SGR doesn't "bleed across" (cells or rows).  We would then add
+	// tests for that here.
+	//
+	// Of course, at that point, we'd also want to support automatic HTML
+	// styling conversion too, so would need a test for that also.
+
+	checkRendersTo(t, table, expected)
+}
+
 func TestTableInMarkdown(t *testing.T) {
 	expected := "" +
 		"Table: Example\n\n" +
