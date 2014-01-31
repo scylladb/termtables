@@ -13,6 +13,14 @@ go get github.com/apcera/termtables
 
 [http://go.pkgdoc.org/github.com/apcera/termtable](http://go.pkgdoc.org/github.com/apcera/termtable)
 
+## APC Command Line usage
+
+`--markdown` — output a markdown table, e.g. `apc app list --markdown`
+
+`--html` — output an html table, e.g. `apc app list --html`
+
+`--ascii` — output an ascii table, e.g. `apc app list --ascii`
+
 ## Basic Usage
 
 ```go
