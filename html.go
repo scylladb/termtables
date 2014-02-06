@@ -50,17 +50,22 @@ func (t *Table) RenderHTML() (buffer string) {
 	style.PaddingRight = 0
 
 	// TODO: control CSS styles to suppress border based upon t.Style.SkipBorder
-	rowsText := make([]string, 0, len(t.elements)+2)
+	rowsText := make([]string, 0, len(t.elements)+6)
 
-	if t.title != nil {
-		rowsText = append(rowsText, "<caption>"+html.EscapeString(
-			strings.TrimSpace(CreateCell(t.title, &CellStyle{}).Render(style)),
-		)+"</caption>\n")
-	}
-	if t.headers != nil {
-		rowsText = append(rowsText, CreateRow(t.headers).HTML("th", style))
+	if t.title != nil || t.headers != nil {
+		rowsText = append(rowsText, "<thead>\n")
+		if t.title != nil {
+			rowsText = append(rowsText, "<caption>"+html.EscapeString(
+				strings.TrimSpace(CreateCell(t.title, &CellStyle{}).Render(style)),
+			)+"</caption>\n")
+		}
+		if t.headers != nil {
+			rowsText = append(rowsText, CreateRow(t.headers).HTML("th", style))
+		}
+		rowsText = append(rowsText, "</thead>\n")
 	}
 
+	rowsText = append(rowsText, "<tbody>\n")
 	// loop over the elements and render them
 	for i := range t.elements {
 		if row, ok := t.elements[i].(*Row); ok {
@@ -69,6 +74,7 @@ func (t *Table) RenderHTML() (buffer string) {
 			rowsText = append(rowsText, fmt.Sprintf("<!-- unable to render line %d, unhandled type -->\n", i))
 		}
 	}
+	rowsText = append(rowsText, "</tbody>\n")
 
-	return "<table>\n" + strings.Join(rowsText, "") + "</table>\n"
+	return "<table class=\"termtable\">\n" + strings.Join(rowsText, "") + "</table>\n"
 }
