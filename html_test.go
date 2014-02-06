@@ -7,12 +7,16 @@ import (
 )
 
 func TestCreateTableHTML(t *testing.T) {
-	expected := "<table>\n" +
+	expected := "<table class=\"termtable\">\n" +
+		"<thead>\n" +
 		"<tr><th>Name</th><th>Value</th></tr>\n" +
+		"</thead>\n" +
+		"<tbody>\n" +
 		"<tr><td>hey</td><td>you</td></tr>\n" +
 		"<tr><td>ken</td><td>1234</td></tr>\n" +
 		"<tr><td>derek</td><td>3.14</td></tr>\n" +
 		"<tr><td>derek too</td><td>3.15</td></tr>\n" +
+		"</tbody>\n" +
 		"</table>\n"
 
 	table := CreateTable()
@@ -31,13 +35,17 @@ func TestCreateTableHTML(t *testing.T) {
 }
 
 func TestTableWithHeaderHTML(t *testing.T) {
-	expected := "<table>\n" +
+	expected := "<table class=\"termtable\">\n" +
+		"<thead>\n" +
 		"<caption>Example</caption>\n" +
 		"<tr><th>Name</th><th>Value</th></tr>\n" +
+		"</thead>\n" +
+		"<tbody>\n" +
 		"<tr><td>hey</td><td>you</td></tr>\n" +
 		"<tr><td>ken</td><td>1234</td></tr>\n" +
 		"<tr><td>derek</td><td>3.14</td></tr>\n" +
 		"<tr><td>derek too</td><td>3.15</td></tr>\n" +
+		"</tbody>\n" +
 		"</table>\n"
 
 	table := CreateTable()
@@ -57,13 +65,17 @@ func TestTableWithHeaderHTML(t *testing.T) {
 }
 
 func TestTableTitleWidthAdjustsHTML(t *testing.T) {
-	expected := "<table>\n" +
+	expected := "<table class=\"termtable\">\n" +
+		"<thead>\n" +
 		"<caption>Example My Foo Bar&#39;d Test</caption>\n" +
 		"<tr><th>Name</th><th>Value</th></tr>\n" +
+		"</thead>\n" +
+		"<tbody>\n" +
 		"<tr><td>hey</td><td>you</td></tr>\n" +
 		"<tr><td>ken</td><td>1234</td></tr>\n" +
 		"<tr><td>derek</td><td>3.14</td></tr>\n" +
 		"<tr><td>derek too</td><td>3.15</td></tr>\n" +
+		"</tbody>\n" +
 		"</table>\n"
 
 	table := CreateTable()
@@ -83,11 +95,13 @@ func TestTableTitleWidthAdjustsHTML(t *testing.T) {
 }
 
 func TestTableWithNoHeadersHTML(t *testing.T) {
-	expected := "<table>\n" +
+	expected := "<table class=\"termtable\">\n" +
+		"<tbody>\n" +
 		"<tr><td>hey</td><td>you</td></tr>\n" +
 		"<tr><td>ken</td><td>1234</td></tr>\n" +
 		"<tr><td>derek</td><td>3.14</td></tr>\n" +
 		"<tr><td>derek too</td><td>3.15</td></tr>\n" +
+		"</tbody>\n" +
 		"</table>\n"
 
 	table := CreateTable()
@@ -105,12 +119,16 @@ func TestTableWithNoHeadersHTML(t *testing.T) {
 }
 
 func TestTableUnicodeWidthsHTML(t *testing.T) {
-	expected := "<table>\n" +
+	expected := "<table class=\"termtable\">\n" +
+		"<thead>\n" +
 		"<tr><th>Name</th><th>Cost</th></tr>\n" +
+		"</thead>\n" +
+		"<tbody>\n" +
 		"<tr><td>Currency</td><td>¤10</td></tr>\n" +
 		"<tr><td>US Dollar</td><td>$30</td></tr>\n" +
 		"<tr><td>Euro</td><td>€27</td></tr>\n" +
 		"<tr><td>Thai</td><td>฿70</td></tr>\n" +
+		"</tbody>\n" +
 		"</table>\n"
 
 	table := CreateTable()
@@ -128,10 +146,14 @@ func TestTableUnicodeWidthsHTML(t *testing.T) {
 }
 
 func TestTableWithAlignment(t *testing.T) {
-	expected := "<table>\n" +
+	expected := "<table class=\"termtable\">\n" +
+		"<thead>\n" +
 		"<tr><th>Foo</th><th>Bar</th></tr>\n" +
+		"</thead>\n" +
+		"<tbody>\n" +
 		"<tr><td>humpty</td><td>dumpty</td></tr>\n" +
 		"<tr><td align='right'>r</td><td>&lt;- on right</td></tr>\n" +
+		"</tbody>\n" +
 		"</table>\n"
 
 	table := CreateTable()
@@ -147,11 +169,15 @@ func TestTableWithAlignment(t *testing.T) {
 }
 
 func TestTableAfterSetAlign(t *testing.T) {
-	expected := "<table>\n" +
+	expected := "<table class=\"termtable\">\n" +
+		"<thead>\n" +
 		"<tr><th>Alphabetical</th><th>Num</th></tr>\n" +
+		"</thead>\n" +
+		"<tbody>\n" +
 		"<tr><td align='right'>alfa</td><td>1</td></tr>\n" +
 		"<tr><td align='right'>bravo</td><td>2</td></tr>\n" +
 		"<tr><td align='right'>charlie</td><td>3</td></tr>\n" +
+		"</tbody>\n" +
 		"</table>\n"
 
 	table := CreateTable()
