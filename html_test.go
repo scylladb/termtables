@@ -193,3 +193,30 @@ func TestTableAfterSetAlign(t *testing.T) {
 		t.Fatal(DisplayFailedOutput(output, expected))
 	}
 }
+
+func TestTableWithAltTitleStyle(t *testing.T) {
+	expected := "" +
+		"<table class=\"termtable\">\n" +
+		"<thead>\n" +
+		"<tr><th style=\"text-align: center\" colspan=\"3\">Metasyntactic</th></tr>\n" +
+		"<tr><th>Foo</th><th>Bar</th><th>Baz</th></tr>\n" +
+		"</thead>\n" +
+		"<tbody>\n" +
+		"<tr><td>a</td><td>b</td><td>c</td></tr>\n" +
+		"<tr><td>α</td><td>β</td><td>γ</td></tr>\n" +
+		"</tbody>\n" +
+		"</table>\n"
+
+	table := CreateTable()
+	table.SetModeHTML()
+	table.SetHTMLStyleTitle(TitleAsThSpan)
+	table.AddTitle("Metasyntactic")
+	table.AddHeaders("Foo", "Bar", "Baz")
+	table.AddRow("a", "b", "c")
+	table.AddRow("α", "β", "γ")
+
+	output := table.Render()
+	if output != expected {
+		t.Fatal(DisplayFailedOutput(output, expected))
+	}
+}

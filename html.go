@@ -9,6 +9,19 @@ import (
 	"strings"
 )
 
+type titleStyle int
+
+const (
+	TitleAsCaption titleStyle = iota
+	TitleAsThSpan
+)
+
+// htmlStyleRules defines attributes which we can use, and might be set on a
+// table by accessors, to influence the type of HTML which is output.
+type htmlStyleRules struct {
+	title titleStyle
+}
+
 // HTML returns an HTML representations of the contents of one row of a table.
 func (r *Row) HTML(tag string, style *renderStyle) string {
 	attrs := make([]string, len(r.cells))
@@ -36,6 +49,22 @@ func (r *Row) HTML(tag string, style *renderStyle) string {
 	return buf.String()
 }
 
+func generateHtmlTitleRow(title interface{}, t *Table, style *renderStyle) string {
+	elContent := html.EscapeString(
+		strings.TrimSpace(CreateCell(t.title, &CellStyle{}).Render(style)),
+	)
+
+	switch style.htmlRules.title {
+	case TitleAsCaption:
+		return "<caption>" + elContent + "</caption>\n"
+	case TitleAsThSpan:
+		return fmt.Sprintf("<tr><th style=\"text-align: center\" colspan=\"%d\">%s</th></tr>\n",
+			style.columns, elContent)
+	default:
+		return "<!-- " + elContent + " -->"
+	}
+}
+
 // RenderHTML returns a string representation of a the table, suitable for
 // inclusion as HTML elsewhere.  Primary use-case controlling layout style
 // is for inclusion into Markdown documents, documenting normal table use.
@@ -55,9 +84,7 @@ func (t *Table) RenderHTML() (buffer string) {
 	if t.title != nil || t.headers != nil {
 		rowsText = append(rowsText, "<thead>\n")
 		if t.title != nil {
-			rowsText = append(rowsText, "<caption>"+html.EscapeString(
-				strings.TrimSpace(CreateCell(t.title, &CellStyle{}).Render(style)),
-			)+"</caption>\n")
+			rowsText = append(rowsText, generateHtmlTitleRow(t.title, t, style))
 		}
 		if t.headers != nil {
 			rowsText = append(rowsText, CreateRow(t.headers).HTML("th", style))

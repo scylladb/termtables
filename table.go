@@ -183,6 +183,12 @@ func (t *Table) SetModeTerminal() {
 	t.outputMode = outputTerminal
 }
 
+// SetHTMLStyleTitle lets an HTML output mode be chosen; we should rework this
+// into a more generic and extensible API as we clean up termtables
+func (t *Table) SetHTMLStyleTitle(want titleStyle) {
+	t.Style.htmlRules.title = want
+}
+
 // Render returns a string representation of a fully rendered table, drawn
 // out for display, with embedded newlines.  If this table is in HTML mode,
 // then this is equivalent to RenderHTML().

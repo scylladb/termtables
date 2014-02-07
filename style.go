@@ -39,6 +39,7 @@ type TableStyle struct {
 	PaddingRight      int
 	Width             int
 	Alignment         tableAlignment
+	htmlRules         htmlStyleRules
 }
 
 // A CellStyle controls all style applicable to one Cell.
