@@ -33,9 +33,10 @@ const (
 // tracking when resetting, if the locale-enabling had been used
 
 var outputsEnabled struct {
-	UTF8     bool
-	HTML     bool
-	Markdown bool
+	UTF8       bool
+	HTML       bool
+	Markdown   bool
+	titleStyle titleStyle
 }
 
 var defaultOutputMode outputMode = outputTerminal
@@ -83,6 +84,11 @@ func EnableUTF8PerLocale() {
 	}
 }
 
+// SetHTMLStyleTitle lets an HTML title output mode be chosen.
+func SetHTMLStyleTitle(want titleStyle) {
+	outputsEnabled.titleStyle = want
+}
+
 // chooseDefaultOutput sets defaultOutputMode based on priority
 // choosing amongst the options which are enabled.  Pros: simpler
 // encapsulation; cons: setting markdown doesn't disable HTML if
@@ -111,6 +117,9 @@ func CreateTable() *Table {
 	t := &Table{elements: []Element{}, Style: DefaultStyle}
 	if outputsEnabled.UTF8 {
 		t.Style.setUtfBoxStyle()
+	}
+	if outputsEnabled.titleStyle != titleStyle(0) {
+		t.Style.htmlRules.title = outputsEnabled.titleStyle
 	}
 	t.outputMode = defaultOutputMode
 	return t
