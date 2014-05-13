@@ -29,6 +29,7 @@ func TestCreateTable(t *testing.T) {
 		"| ken       | 1234  |\n" +
 		"| derek     | 3.14  |\n" +
 		"| derek too | 3.15  |\n" +
+		"| escaping  | rox%% |\n" +
 		"+-----------+-------+\n"
 
 	table := CreateTable()
@@ -38,6 +39,7 @@ func TestCreateTable(t *testing.T) {
 	table.AddRow("ken", 1234)
 	table.AddRow("derek", 3.14)
 	table.AddRow("derek too", 3.1456788)
+	table.AddRow("escaping", "rox%%")
 
 	checkRendersTo(t, table, expected)
 }
@@ -183,6 +185,7 @@ func TestTableInUTF8(t *testing.T) {
 		"│ ken       │ 1234  │\n" +
 		"│ derek     │ 3.14  │\n" +
 		"│ derek too │ 3.15  │\n" +
+		"│ escaping  │ rox%% │\n" +
 		"╰───────────┴───────╯\n"
 
 	table := CreateTable()
@@ -194,6 +197,7 @@ func TestTableInUTF8(t *testing.T) {
 	table.AddRow("ken", 1234)
 	table.AddRow("derek", 3.14)
 	table.AddRow("derek too", 3.1456788)
+	table.AddRow("escaping", "rox%%")
 
 	checkRendersTo(t, table, expected)
 }
@@ -245,7 +249,8 @@ func TestTableInMarkdown(t *testing.T) {
 		"| Name  | Value |\n" +
 		"| ----- | ----- |\n" +
 		"| hey   | you   |\n" +
-		"| a &#x7c; b | esc   |\n"
+		"| a &#x7c; b | esc   |\n" +
+		"| esc   | rox%% |\n"
 
 	table := CreateTable()
 	table.SetModeMarkdown()
@@ -254,6 +259,7 @@ func TestTableInMarkdown(t *testing.T) {
 	table.AddHeaders("Name", "Value")
 	table.AddRow("hey", "you")
 	table.AddRow("a | b", "esc")
+	table.AddRow("esc", "rox%%")
 
 	checkRendersTo(t, table, expected)
 }
@@ -342,4 +348,25 @@ func TestTableWidthHandling_SecondErrorCondition(t *testing.T) {
 	if output != expected {
 		t.Fatal(DisplayFailedOutput(output, expected))
 	}
+}
+
+func TestTableMissingCells(t *testing.T) {
+	expected := "" +
+		"+----------+---------+---------+\n" +
+		"| Name     | Value 1 | Value 2 |\n" +
+		"+----------+---------+---------+\n" +
+		"| hey      | you     | person  |\n" +
+		"| ken      | 1234    |\n" +
+		"| escaping | rox%s%% |\n" +
+		"+----------+---------+---------+\n"
+		// FIXME: missing extra cells there
+
+	table := CreateTable()
+
+	table.AddHeaders("Name", "Value 1", "Value 2")
+	table.AddRow("hey", "you", "person")
+	table.AddRow("ken", 1234)
+	table.AddRow("escaping", "rox%s%%")
+
+	checkRendersTo(t, table, expected)
 }
