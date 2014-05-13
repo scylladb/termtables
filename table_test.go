@@ -350,6 +350,32 @@ func TestTableWidthHandling_SecondErrorCondition(t *testing.T) {
 	}
 }
 
+func TestTableAlignPostsetting(t *testing.T) {
+	expected := "" +
+		"+-----------+-------+\n" +
+		"| Name      | Value |\n" +
+		"+-----------+-------+\n" +
+		"|       hey | you   |\n" +
+		"|       ken | 1234  |\n" +
+		"|     derek | 3.14  |\n" +
+		"| derek too | 3.15  |\n" +
+		"|  escaping | rox%% |\n" +
+		"+-----------+-------+\n"
+
+	table := CreateTable()
+
+	table.AddHeaders("Name", "Value")
+	table.AddRow("hey", "you")
+	table.AddRow("ken", 1234)
+	table.AddRow("derek", 3.14)
+	table.AddRow("derek too", 3.1456788)
+	table.AddRow("escaping", "rox%%")
+
+	table.SetAlign(AlignRight, 1)
+
+	checkRendersTo(t, table, expected)
+}
+
 func TestTableMissingCells(t *testing.T) {
 	expected := "" +
 		"+----------+---------+---------+\n" +
