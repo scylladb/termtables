@@ -1,5 +1,7 @@
 // Copyright 2013 Apcera Inc. All rights reserved.
 
+// +build !windows
+
 package locale
 
 /*
