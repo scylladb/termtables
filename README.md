@@ -11,7 +11,7 @@ go get github.com/apcera/termtables
 
 ## Go Style Documentation
 
-[http://godoc.org/](http://godoc.org/)
+[http://godoc.org/github.com/apcera/termtable](http://godoc.org/github.com/apcera/termtable)
 
 ## APC Command Line usage
 
