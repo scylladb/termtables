@@ -396,3 +396,41 @@ func TestTableMissingCells(t *testing.T) {
 
 	checkRendersTo(t, table, expected)
 }
+
+// We don't yet support combining characters, double-width characters or
+// anything to do with estimating a tty-style "character width" for what in
+// Unicode is a grapheme cluster.  This disabled test shows what we want
+// to support, but don't yet.
+func TestTableWithCombiningChars(t *testing.T) {
+	t.Skip("FIXME: not implemented: grapheme cluster support & combining characters")
+	expected := "" +
+		"+------+---+\n" +
+		"| noel | 1 |\n" +
+		"| noël | 2 |\n" +
+		"| noël | 3 |\n" +
+		"+------+---+\n"
+
+	table := CreateTable()
+
+	table.AddRow("noel", "1")
+	table.AddRow("noe\u0308l", "2") // LATIN SMALL LETTER E  +  COMBINING DIAERESIS
+	table.AddRow("noël", "3")       // Hex EB; LATIN SMALL LETTER E WITH DIAERESIS
+
+	checkRendersTo(t, table, expected)
+}
+
+// another unicode length issue
+func TestTableWithFullwidthChars(t *testing.T) {
+	t.Skip("FIXME: not implemented: grapheme cluster support & widechars")
+	expected := "" +
+		"+----------+------------+\n" +
+		"| wide     | not really |\n" +
+		"| ｗｉｄｅ | fullwidth  |\n" +
+		"+----------+------------+\n"
+
+	table := CreateTable()
+	table.AddRow("wide", "not really")
+	table.AddRow("ｗｉｄｅ", "fullwidth") // FULLWIDTH LATIN SMALL LETTER <X>
+
+	checkRendersTo(t, table, expected)
+}
