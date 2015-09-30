@@ -1,6 +1,6 @@
 // Copyright 2014 Apcera Inc. All rights reserved.
 
-// +build windows,!cgo
+// +build windows
 
 package locale
 
