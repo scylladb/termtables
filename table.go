@@ -146,7 +146,7 @@ func (t *Table) AddTitle(title interface{}) {
 
 // AddHeaders supplies column headers for the table.
 func (t *Table) AddHeaders(headers ...interface{}) {
-	t.headers = headers[:]
+	t.headers = append(t.headers, headers...)
 }
 
 // SetAlign changes the alignment for elements in a column of the table;

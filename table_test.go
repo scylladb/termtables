@@ -434,3 +434,19 @@ func TestTableWithFullwidthChars(t *testing.T) {
 
 	checkRendersTo(t, table, expected)
 }
+
+func TestTableMultipleAddHeader(t *testing.T) {
+	expected := "" +
+		"+--------------+--------+-------+\n" +
+		"| First column | Second | Third |\n" +
+		"+--------------+--------+-------+\n" +
+		"| 2            | 3      | 5     |\n" +
+		"+--------------+--------+-------+\n"
+
+	table := CreateTable()
+	table.AddHeaders("First column", "Second")
+	table.AddHeaders("Third")
+	table.AddRow(2, 3, 5)
+
+	checkRendersTo(t, table, expected)
+}
