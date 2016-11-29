@@ -3,9 +3,10 @@
 package termtables
 
 import (
+	"os"
+	"runtime"
 	"strings"
 
-	"github.com/apcera/termtables/locale"
 	"github.com/apcera/termtables/term"
 )
 
@@ -78,10 +79,30 @@ func SetModeMarkdown(onoff bool) {
 // EnableUTF8PerLocale will use current locale character map information to
 // determine if UTF-8 is expected and, if so, is equivalent to EnableUTF8.
 func EnableUTF8PerLocale() {
-	charmap := locale.GetCharmap()
-	if strings.EqualFold(charmap, "UTF-8") {
+	locale := getLocale()
+	if strings.Contains(locale, "UTF-8") {
 		EnableUTF8()
 	}
+}
+
+// getLocale returns the current locale name.
+func getLocale() string {
+	if runtime.GOOS == "windows" {
+		// TODO: detect windows locale
+		return "US-ASCII"
+	}
+	return unixLocale()
+}
+
+// unixLocale returns the locale by checking the $LC_ALL, $LC_CTYPE, and $LANG
+// environment variables. If none of those are set, it returns "US-ASCII".
+func unixLocale() string {
+	for _, env := range []string{"LC_ALL", "LC_CTYPE", "LANG"} {
+		if locale := os.Getenv(env); locale != "" {
+			return locale
+		}
+	}
+	return "US-ASCII"
 }
 
 // SetHTMLStyleTitle lets an HTML title output mode be chosen.
