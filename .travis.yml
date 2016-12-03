@@ -1,15 +1,9 @@
 language: go
 go:
-  - 1.5.4
-  - 1.6.2
+  - 1.6
+  - 1.7
   - tip
 
-env:
-  global:
-    - GO15VENDOREXPERIMENT=1
-
 script:
-- go fmt ./...
 - go vet ./...
-- go test -i -race ./...
 - go test -v -race ./...
