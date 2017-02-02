@@ -1,18 +1,8 @@
 // Copyright 2013 Apcera Inc. All rights reserved.
 
-// +build cgo,!windows
+// +build !windows
 
 package term
-
-/*
-#include <termios.h>
-#include <sys/ioctl.h>
-
-// provides struct winsize *, with:
-//    ws_row, ws_col, ws_xpixel, ws_ypixel
-// all short
-*/
-import "C"
 
 import (
 	"errors"
@@ -32,15 +22,14 @@ var ErrGetWinsizeFailed = errors.New("term: syscall.TIOCGWINSZ failed")
 // group at the time of the change, so a long-running process might reasonably
 // watch for SIGWINCH and arrange to re-fetch the size when that happens.
 func GetTerminalWindowSize(file *os.File) (*Size, error) {
-	fd := uintptr(file.Fd())
-	winsize := C.struct_winsize{}
-	winp := uintptr(unsafe.Pointer(&winsize))
-	_, _, ep := syscall.Syscall(syscall.SYS_IOCTL, fd, syscall.TIOCGWINSZ, winp)
-	if ep != 0 {
-		return nil, ErrGetWinsizeFailed
+	// Based on source from from golang.org/x/crypto/ssh/terminal/util.go
+	var dimensions [4]uint16
+	if _, _, err := syscall.Syscall6(syscall.SYS_IOCTL, file.Fd(), uintptr(syscall.TIOCGWINSZ), uintptr(unsafe.Pointer(&dimensions)), 0, 0, 0); err != 0 {
+		return nil, err
 	}
+
 	return &Size{
-		Lines:   int(winsize.ws_row),
-		Columns: int(winsize.ws_col),
+		Lines:   int(dimensions[0]),
+		Columns: int(dimensions[1]),
 	}, nil
 }
