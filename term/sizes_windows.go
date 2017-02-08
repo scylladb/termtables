@@ -48,7 +48,7 @@ func GetTerminalWindowSize(file *os.File) (*Size, error) {
 	var info consoleScreenBufferInfo
 	_, _, e := syscall.Syscall(procGetConsoleScreenBufferInfo.Addr(), 2, file.Fd(), uintptr(unsafe.Pointer(&info)), 0)
 	if e != 0 {
-		return 0, 0, error(e)
+		return nil, error(e)
 	}
 	return &Size{
 		Lines:   int(info.size.y),
