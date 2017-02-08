@@ -1,9 +1,7 @@
 // Copyright 2012-2013 Apcera Inc. All rights reserved.
 package termtables
 
-import (
-	"testing"
-)
+import "testing"
 
 func DisplayFailedOutput(actual, expected string) string {
 	return "Output didn't match expected\n\n" +
@@ -402,7 +400,6 @@ func TestTableMissingCells(t *testing.T) {
 // Unicode is a grapheme cluster.  This disabled test shows what we want
 // to support, but don't yet.
 func TestTableWithCombiningChars(t *testing.T) {
-	t.Skip("FIXME: not implemented: grapheme cluster support & combining characters")
 	expected := "" +
 		"+------+---+\n" +
 		"| noel | 1 |\n" +
@@ -421,7 +418,6 @@ func TestTableWithCombiningChars(t *testing.T) {
 
 // another unicode length issue
 func TestTableWithFullwidthChars(t *testing.T) {
-	t.Skip("FIXME: not implemented: grapheme cluster support & widechars")
 	expected := "" +
 		"+----------+------------+\n" +
 		"| wide     | not really |\n" +
@@ -433,6 +429,48 @@ func TestTableWithFullwidthChars(t *testing.T) {
 	table.AddRow("ｗｉｄｅ", "fullwidth") // FULLWIDTH LATIN SMALL LETTER <X>
 
 	checkRendersTo(t, table, expected)
+}
+
+// Tests CJK characters using examples given in issue #33. The examples may not
+// look like they line up but you can visually confirm its accuracy with a
+// fmt.Print.
+func TestCJKChars(t *testing.T) {
+	expected := "" +
+		"+-------+---------+----------+\n" +
+		"| KeyID | ValueID | ValueCN  |\n" +
+		"+-------+---------+----------+\n" +
+		"| 8     | 51      | 精钢     |\n" +
+		"| 8     | 52      | 鳄鱼皮   |\n" +
+		"| 8     | 53      | 镀金皮带 |\n" +
+		"| 8     | 54      | 精钢     |\n" +
+		"+-------+---------+----------+\n"
+
+	table := CreateTable()
+	table.AddHeaders("KeyID", "ValueID", "ValueCN")
+	table.AddRow("8", 51, "精钢")
+	table.AddRow("8", 52, "鳄鱼皮")
+	table.AddRow("8", 53, "镀金皮带")
+	table.AddRow("8", 54, "精钢")
+	checkRendersTo(t, table, expected)
+
+	expected2 := "" +
+		"+--------------------+----------------------+\n" +
+		"| field              | value                |\n" +
+		"+--------------------+----------------------+\n" +
+		"| GoodsPropertyKeyID | 9                    |\n" +
+		"| MerchantAccountID  | 0                    |\n" +
+		"| GoodsCategoryCode  | 100001               |\n" +
+		"| NameCN             | 机芯类型             |\n" +
+		"| NameJP             | ムーブメントのタイプ |\n" +
+		"+--------------------+----------------------+\n"
+	table = CreateTable()
+	table.AddHeaders("field", "value")
+	table.AddRow("GoodsPropertyKeyID", 9)
+	table.AddRow("MerchantAccountID", 0)
+	table.AddRow("GoodsCategoryCode", 100001)
+	table.AddRow("NameCN", "机芯类型")
+	table.AddRow("NameJP", "ムーブメントのタイプ")
+	checkRendersTo(t, table, expected2)
 }
 
 func TestTableMultipleAddHeader(t *testing.T) {

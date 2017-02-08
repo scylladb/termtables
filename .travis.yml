@@ -5,5 +5,5 @@ go:
   - tip
 
 script:
-- go vet ./...
+- go vet $(go list ./...|grep -v "/vendor/")
 - go test -v -race ./...

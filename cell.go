@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"unicode/utf8"
+
+	"github.com/lucy/runewidth"
 )
 
 var (
@@ -57,15 +59,10 @@ func createCell(column int, v interface{}, style *CellStyle) *Cell {
 	return cell
 }
 
-// Width returns the width of the content of the cell, measured in runes; if
-// each rune is a single rendering glyph and not "wide", then this is
-// sufficient to calculate the width for rendering purposes.  This will fail
-// on more sophisticated Unicode; in which case, this is the place to plug in
-// better logic for "measuring" the display width.  Around about then, you
-// run into some fundamental limitations of a cell grid display model as is
-// used in ttys.
+// Width returns the width of the content of the cell, measured in runes as best
+// as possible considering sophisticated Unicode.
 func (c *Cell) Width() int {
-	return utf8.RuneCountInString(filterColorCodes(c.formattedValue))
+	return runewidth.StringWidth(filterColorCodes(c.formattedValue))
 }
 
 // Filter out terminal bold/color sequences in a string.
