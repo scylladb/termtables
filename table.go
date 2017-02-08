@@ -3,6 +3,7 @@
 package termtables
 
 import (
+	"bytes"
 	"os"
 	"runtime"
 	"strings"
@@ -17,7 +18,8 @@ import (
 // variable and, on Unix, tty information.
 var MaxColumns = 80
 
-// An Element is a drawn representation of the contents of a table cell.
+// Element the interface that can draw a representation of the contents of a
+// table cell.
 type Element interface {
 	Render(*renderStyle) string
 }
@@ -30,8 +32,8 @@ const (
 	outputHTML
 )
 
-// open question: should UTF-8 become an output mode?  It does require more
-// tracking when resetting, if the locale-enabling had been used
+// Open question: should UTF-8 become an output mode?  It does require more
+// tracking when resetting, if the locale-enabling had been used.
 
 var outputsEnabled struct {
 	UTF8       bool
@@ -126,7 +128,7 @@ func chooseDefaultOutput() {
 }
 
 func init() {
-	// do not enable UTF-8 per locale by default, breaks tests
+	// Do not enable UTF-8 per locale by default, breaks tests.
 	sz, err := term.GetSize()
 	if err == nil && sz.Columns != 0 {
 		MaxColumns = sz.Columns
@@ -208,13 +210,13 @@ func (t *Table) SetModeMarkdown() {
 	t.outputMode = outputMarkdown
 }
 
-// SetModeTerminal switches this table to be in terminal mode
+// SetModeTerminal switches this table to be in terminal mode.
 func (t *Table) SetModeTerminal() {
 	t.outputMode = outputTerminal
 }
 
 // SetHTMLStyleTitle lets an HTML output mode be chosen; we should rework this
-// into a more generic and extensible API as we clean up termtables
+// into a more generic and extensible API as we clean up termtables.
 func (t *Table) SetHTMLStyleTitle(want titleStyle) {
 	t.Style.htmlRules.title = want
 }
@@ -222,8 +224,8 @@ func (t *Table) SetHTMLStyleTitle(want titleStyle) {
 // Render returns a string representation of a fully rendered table, drawn
 // out for display, with embedded newlines.  If this table is in HTML mode,
 // then this is equivalent to RenderHTML().
-func (t *Table) Render() (buffer string) {
-	// elements is already populated with row data
+func (t *Table) Render() string {
+	// Elements is already populated with row data.
 	switch t.outputMode {
 	case outputTerminal:
 		return t.renderTerminal()
@@ -238,61 +240,68 @@ func (t *Table) Render() (buffer string) {
 
 // renderTerminal returns a string representation of a fully rendered table,
 // drawn out for display, with embedded newlines.
-func (t *Table) renderTerminal() (buffer string) {
-	// initial top line
-	if !t.Style.SkipBorder {
-		if t.title != nil && t.headers == nil {
-			t.elements = append([]Element{&Separator{where: LINE_SUBTOP}}, t.elements...)
-		} else if t.title == nil && t.headers == nil {
-			t.elements = append([]Element{&Separator{where: LINE_TOP}}, t.elements...)
+func (t *Table) renderTerminal() string {
+	// Use a placeholder rather than adding titles/headers to the tables
+	// elements or else successive calls will compound them.
+	tt := t.clone()
+
+	// Initial top line.
+	if !tt.Style.SkipBorder {
+		if tt.title != nil && tt.headers == nil {
+			tt.elements = append([]Element{&Separator{where: LINE_SUBTOP}}, tt.elements...)
+		} else if tt.title == nil && tt.headers == nil {
+			tt.elements = append([]Element{&Separator{where: LINE_TOP}}, tt.elements...)
 		} else {
-			t.elements = append([]Element{&Separator{where: LINE_INNER}}, t.elements...)
+			tt.elements = append([]Element{&Separator{where: LINE_INNER}}, tt.elements...)
 		}
 	}
 
-	// if we have headers, include them
-	if t.headers != nil {
+	// If we have headers, include them.
+	if tt.headers != nil {
 		ne := make([]Element, 2)
-		ne[1] = CreateRow(t.headers)
-		if t.title != nil {
+		ne[1] = CreateRow(tt.headers)
+		if tt.title != nil {
 			ne[0] = &Separator{where: LINE_SUBTOP}
 		} else {
 			ne[0] = &Separator{where: LINE_TOP}
 		}
-		t.elements = append(ne, t.elements...)
+		tt.elements = append(ne, tt.elements...)
 	}
 
-	// if we have a title, write them
-	if t.title != nil {
-		// match changes to this into renderMarkdown too
-		t.titleCell = CreateCell(t.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})
+	// If we have a title, write it.
+	if tt.title != nil {
+		// Match changes to this into renderMarkdown too.
+		tt.titleCell = CreateCell(tt.title, &CellStyle{Alignment: AlignCenter, ColSpan: 999})
 		ne := []Element{
 			&StraightSeparator{where: LINE_TOP},
-			CreateRow([]interface{}{t.titleCell}),
+			CreateRow([]interface{}{tt.titleCell}),
 		}
-		t.elements = append(ne, t.elements...)
+		tt.elements = append(ne, tt.elements...)
 	}
 
-	// generate the runtime style
-	style := createRenderStyle(t)
+	// Create a new table from the
+	// generate the runtime style. Must include all cells being printed.
+	style := createRenderStyle(tt)
 
-	// loop over the elements and render them
-	for _, e := range t.elements {
-		buffer += e.Render(style) + "\n"
+	// Loop over the elements and render them.
+	b := bytes.NewBuffer(nil)
+	for _, e := range tt.elements {
+		b.WriteString(e.Render(style))
+		b.WriteString("\n")
 	}
 
-	// add bottom line
+	// Add bottom line.
 	if !style.SkipBorder {
-		buffer += (&Separator{where: LINE_BOTTOM}).Render(style) + "\n"
+		b.WriteString((&Separator{where: LINE_BOTTOM}).Render(style) + "\n")
 	}
 
-	return buffer
+	return b.String()
 }
 
 // renderMarkdown returns a string representation of a table in Markdown
 // markup format using GitHub Flavored Markdown's notation (since tables
 // are not in the core Markdown spec).
-func (t *Table) renderMarkdown() (buffer string) {
+func (t *Table) renderMarkdown() string {
 	// We need ASCII drawing characters; we need a line after the header;
 	// *do* need a header!  Do not need to markdown-escape contents of
 	// tables as markdown is ignored in there.  Do need to do _something_
@@ -313,33 +322,50 @@ func (t *Table) renderMarkdown() (buffer string) {
 	}
 
 	firstLines = append(firstLines, CreateRow(t.headers))
-	// this is a dummy line, swapped out below:
+	// This is a dummy line, swapped out below.
 	firstLines = append(firstLines, firstLines[0])
 	t.elements = append(firstLines, t.elements...)
-	// generate the runtime style
+	// Generate the runtime style.
 	style := createRenderStyle(t)
-	// we know that the second line is a dummy, we can replace it
+	// We know that the second line is a dummy, we can replace it.
 	mdRow := CreateRow([]interface{}{})
 	for i := 0; i < style.columns; i++ {
 		mdRow.AddCell(CreateCell(strings.Repeat("-", style.cellWidths[i]), &CellStyle{}))
 	}
 	t.elements[1] = mdRow
 
-	// comes after style is generated, which must come after all
-	// width-affecting changes are in
+	b := bytes.NewBuffer(nil)
+	// Comes after style is generated, which must come after all width-affecting
+	// changes are in.
 	if t.title != nil {
-		// markdown doesn't support titles or column spanning; we _should_
+		// Markdown doesn't support titles or column spanning; we _should_
 		// escape the title, but doing that to handle all possible forms of
 		// markup would require a heavy dependency, so we punt.
-		buffer += "Table: " +
-			strings.TrimSpace(CreateCell(t.title, &CellStyle{}).Render(style)) +
-			"\n\n"
+		b.WriteString("Table: ")
+		b.WriteString(strings.TrimSpace(CreateCell(t.title, &CellStyle{}).Render(style)))
+		b.WriteString("\n\n")
 	}
 
-	// loop over the elements and render them
+	// Loop over the elements and render them.
 	for _, e := range t.elements {
-		buffer += e.Render(style) + "\n"
+		b.WriteString(e.Render(style))
+		b.WriteString("\n")
 	}
 
-	return buffer
+	return b.String()
+}
+
+// clone returns a copy of the table with the underlying slices being copied;
+// the references to the Elements/cells are left as shallow copies.
+func (t *Table) clone() *Table {
+	tt := &Table{outputMode: t.outputMode, Style: t.Style, title: t.title}
+	if t.headers != nil {
+		tt.headers = make([]interface{}, len(t.headers))
+		copy(tt.headers, t.headers)
+	}
+	if t.elements != nil {
+		tt.elements = make([]Element, len(t.elements))
+		copy(tt.elements, t.elements)
+	}
+	return tt
 }

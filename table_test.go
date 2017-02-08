@@ -91,6 +91,34 @@ func TestTableWithHeader(t *testing.T) {
 	checkRendersTo(t, table, expected)
 }
 
+// TestTableWithHeaderMultipleTimes ensures that printing a table with headers
+// multiple times continues to render correctly.
+func TestTableWithHeaderMultipleTimes(t *testing.T) {
+	expected := "" +
+		"+-------------------+\n" +
+		"|      Example      |\n" +
+		"+-----------+-------+\n" +
+		"| Name      | Value |\n" +
+		"+-----------+-------+\n" +
+		"| hey       | you   |\n" +
+		"| ken       | 1234  |\n" +
+		"| derek     | 3.14  |\n" +
+		"| derek too | 3.15  |\n" +
+		"+-----------+-------+\n"
+
+	table := CreateTable()
+
+	table.AddTitle("Example")
+	table.AddHeaders("Name", "Value")
+	table.AddRow("hey", "you")
+	table.AddRow("ken", 1234)
+	table.AddRow("derek", 3.14)
+	table.AddRow("derek too", 3.1456788)
+
+	checkRendersTo(t, table, expected)
+	checkRendersTo(t, table, expected)
+}
+
 func TestTableTitleWidthAdjusts(t *testing.T) {
 	expected := "" +
 		"+---------------------------+\n" +
@@ -487,4 +515,48 @@ func TestTableMultipleAddHeader(t *testing.T) {
 	table.AddRow(2, 3, 5)
 
 	checkRendersTo(t, table, expected)
+}
+
+func createTestTable() *Table {
+	table := CreateTable()
+	header := []interface{}{}
+	for i := 0; i < 50; i++ {
+		header = append(header, "First Column")
+	}
+	table.AddHeaders(header...)
+	for i := 0; i < 3000; i++ {
+		row := []interface{}{}
+		for i := 0; i < 50; i++ {
+			row = append(row, "First row value")
+		}
+		table.AddRow(row...)
+	}
+	return table
+}
+
+func BenchmarkTableRenderTerminal(b *testing.B) {
+	table := createTestTable()
+	table.SetModeTerminal()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		table.Render()
+	}
+}
+
+func BenchmarkTableRenderMarkdown(b *testing.B) {
+	table := createTestTable()
+	table.SetModeMarkdown()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		table.Render()
+	}
+}
+
+func BenchmarkTableRenderHTML(b *testing.B) {
+	table := createTestTable()
+	table.SetModeHTML()
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		table.Render()
+	}
 }
