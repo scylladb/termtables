@@ -79,7 +79,7 @@ func SetModeMarkdown(onoff bool) {
 	chooseDefaultOutput()
 }
 
-var utfRe = regexp.MustCompile(`utf-8|UTF-8`)
+var utfRe = regexp.MustCompile(`utf\-8|utf8|UTF\-8|UTF8`)
 
 // EnableUTF8PerLocale will use current locale character map information to
 // determine if UTF-8 is expected and, if so, is equivalent to EnableUTF8.
