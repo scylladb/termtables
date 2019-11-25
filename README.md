@@ -1,6 +1,6 @@
 # Termtables
 
-[![Build Status](https://travis-ci.org/apcera/termtables.svg?branch=master)](https://travis-ci.org/apcera/termtables)
+[![Build Status](https://travis-ci.org/scylladb/termtables.svg?branch=master)](https://travis-ci.org/scylladb/termtables)
 
 A [Go](http://golang.org) port of the Ruby library [terminal-tables](https://github.com/visionmedia/terminal-table) for
 fast and simple ASCII table generation.
@@ -8,12 +8,12 @@ fast and simple ASCII table generation.
 ## Installation
 
 ```bash
-go get github.com/apcera/termtables
+go get github.com/scylladb/termtables
 ```
 
 ## Go Style Documentation
 
-[http://godoc.org/github.com/apcera/termtables](http://godoc.org/github.com/apcera/termtables)
+[http://godoc.org/github.com/scylladb/termtables](http://godoc.org/github.com/scylladb/termtables)
 
 ## APC Command Line usage
 
@@ -30,7 +30,7 @@ package main
 
 import (
   "fmt"
-  "github.com/apcera/termtables"
+  "github.com/scylladb/termtables"
 )
 
 func main() {
