@@ -35,7 +35,7 @@ var (
 type Cell struct {
 	column         int
 	formattedValue string
-	alignment      *tableAlignment
+	alignment      *TableAlignment
 	colSpan        int
 }
 

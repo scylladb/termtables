@@ -378,26 +378,26 @@ func TestTableWidthHandling_SecondErrorCondition(t *testing.T) {
 
 func TestTableAlignPostsetting(t *testing.T) {
 	expected := "" +
-		"+-----------+-------+\n" +
-		"| Name      | Value |\n" +
-		"+-----------+-------+\n" +
-		"|       hey | you   |\n" +
-		"|       ken | 1234  |\n" +
-		"|     derek | 3.14  |\n" +
-		"| derek too | 3.15  |\n" +
-		"|  escaping | rox%% |\n" +
-		"+-----------+-------+\n"
+		"+-----------+-------+----------+\n"+
+		"| Name      | Value | Value 2  |\n"+
+		"+-----------+-------+----------+\n"+
+		"|       hey |   you | man      |\n"+
+		"|       ken |  1234 | 4321     |\n"+
+		"|     derek |  3.14 | bob      |\n"+
+		"| derek too |  3.15 | long bob |\n"+
+		"|  escaping | rox%% | :)       |\n"+
+		"+-----------+-------+----------+\n"
 
 	table := CreateTable()
 
-	table.AddHeaders("Name", "Value")
-	table.AddRow("hey", "you")
-	table.AddRow("ken", 1234)
-	table.AddRow("derek", 3.14)
-	table.AddRow("derek too", 3.1456788)
-	table.AddRow("escaping", "rox%%")
+	table.AddHeaders("Name", "Value", "Value 2")
+	table.AddRow("hey", "you", "man")
+	table.AddRow("ken", 1234, 4321)
+	table.AddRow("derek", 3.14, "bob")
+	table.AddRow("derek too", 3.1456788, "long bob")
+	table.AddRow("escaping", "rox%%", ":)")
 
-	table.SetAlign(AlignRight, 1)
+	table.SetColumnAlignment(AlignRight, 1, 2)
 
 	checkRendersTo(t, table, expected)
 }

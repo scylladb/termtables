@@ -186,7 +186,7 @@ func TestTableAfterSetAlign(t *testing.T) {
 	table.AddRow("alfa", 1)
 	table.AddRow("bravo", 2)
 	table.AddRow("charlie", 3)
-	table.SetAlign(AlignRight, 1)
+	table.SetColumnAlignment(AlignRight, 1)
 
 	output := table.Render()
 	if output != expected {
