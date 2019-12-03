@@ -8,14 +8,14 @@ import (
 	"unicode/utf8"
 )
 
-type tableAlignment int
+type TableAlignment int
 
 // These constants control the alignment which should be used when rendering
 // the content of a cell.
 const (
-	AlignLeft   = tableAlignment(1)
-	AlignCenter = tableAlignment(2)
-	AlignRight  = tableAlignment(3)
+	AlignLeft   = TableAlignment(1)
+	AlignCenter = TableAlignment(2)
+	AlignRight  = TableAlignment(3)
 )
 
 // TableStyle controls styling information for a Table as a whole.
@@ -38,14 +38,14 @@ type TableStyle struct {
 	PaddingLeft       int
 	PaddingRight      int
 	Width             int
-	Alignment         tableAlignment
+	Alignment         TableAlignment
 	htmlRules         htmlStyleRules
 }
 
 // A CellStyle controls all style applicable to one Cell.
 type CellStyle struct {
 	// Alignment indicates the alignment to be used in rendering the content
-	Alignment tableAlignment
+	Alignment TableAlignment
 
 	// ColSpan indicates how many columns this Cell is expected to consume.
 	ColSpan int
